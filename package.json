@@ -6,9 +6,11 @@
     "lint": "eslint .",
     "validate": "node scripts/validate.mjs",
     "build": "node scripts/package.mjs",
+    "generate-icons": "node scripts/generate-icons.mjs",
     "check": "npm run validate && npm run lint"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@eslint/js": "^9.39.1",
     "eslint": "^9.39.1",
     "globals": "^16.5.0"

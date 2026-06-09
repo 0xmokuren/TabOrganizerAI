@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tab Cluster AI",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Tab Cluster AI — ローカル AI または Gemini API でタブを自動グループ化します",
   "permissions": ["tabs", "tabGroups", "storage"],
   "host_permissions": ["https://generativelanguage.googleapis.com/*"],
