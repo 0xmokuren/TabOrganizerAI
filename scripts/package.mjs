@@ -5,9 +5,9 @@ import { execFileSync } from 'node:child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = join(root, 'dist');
-const stagingDir = join(distDir, 'TabOrganizerAI');
+const stagingDir = join(distDir, 'TabClusterAI');
 const { version } = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
-const zipFileName = `TabOrganizerAI-${version}.zip`;
+const zipFileName = `TabClusterAI-${version}.zip`;
 const zipPath = join(distDir, zipFileName);
 
 const includePaths = [

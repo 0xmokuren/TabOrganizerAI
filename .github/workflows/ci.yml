@@ -78,7 +78,7 @@ jobs:
         run: |
           VERSION=$(node -p "JSON.parse(require('fs').readFileSync('manifest.json','utf8')).version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "zip=dist/TabOrganizerAI-${VERSION}.zip" >> "$GITHUB_OUTPUT"
+          echo "zip=dist/TabClusterAI-${VERSION}.zip" >> "$GITHUB_OUTPUT"
 
       - name: Verify build output
         run: test -f "${{ steps.version.outputs.zip }}"
@@ -86,7 +86,7 @@ jobs:
       - name: Upload extension artifact
         uses: actions/upload-artifact@v7
         with:
-          name: TabOrganizerAI
+          name: TabClusterAI
           path: ${{ steps.version.outputs.zip }}
           if-no-files-found: error
 
@@ -110,7 +110,7 @@ jobs:
       - name: Download extension artifact
         uses: actions/download-artifact@v6
         with:
-          name: TabOrganizerAI
+          name: TabClusterAI
           path: dist
 
       - name: Publish GitHub Release
@@ -119,7 +119,7 @@ jobs:
         run: |
           TAG="${{ steps.version.outputs.tag }}"
           VERSION="${{ steps.version.outputs.version }}"
-          ZIP="dist/TabOrganizerAI-${VERSION}.zip"
+          ZIP="dist/TabClusterAI-${VERSION}.zip"
 
           if [ ! -f "$ZIP" ]; then
             echo "Release asset not found: $ZIP"
