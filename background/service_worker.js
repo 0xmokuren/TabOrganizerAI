@@ -1,5 +1,7 @@
-import { checkAiAvailability, suggestGroups } from '../lib/ai-organizer.js';
 import { applyGroupPlan, getOrganizableTabs } from '../lib/tab-manager.js';
+
+// AI 処理はユーザー操作が必要なため popup 側で実行する。
+// Service Worker は将来のバックグラウンド機能用に最小構成で残す。
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   handleMessage(message)
@@ -15,39 +17,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 async function handleMessage(message) {
   switch (message.type) {
-    case 'CHECK_AI':
-      return { ok: true, ...(await checkAiAvailability()) };
-
     case 'GET_TABS': {
       const tabs = await getOrganizableTabs(message.currentWindowOnly !== false);
       return {
         ok: true,
-        tabs: tabs.map((tab) => ({
-          id: tab.id,
-          title: tab.title || 'Untitled',
-          url: tab.url || '',
-        })),
-      };
-    }
-
-    case 'SUGGEST_GROUPS': {
-      const tabs = await getOrganizableTabs(message.currentWindowOnly !== false);
-      const requestId = message.requestId || 'default';
-
-      const plan = await suggestGroups(tabs, {
-        onDownloadProgress(percent) {
-          chrome.runtime.sendMessage({
-            type: 'DOWNLOAD_PROGRESS',
-            requestId,
-            percent,
-          }).catch(() => {});
-        },
-      });
-
-      return {
-        ok: true,
-        plan,
-        tabCount: tabs.length,
         tabs: tabs.map((tab) => ({
           id: tab.id,
           title: tab.title || 'Untitled',

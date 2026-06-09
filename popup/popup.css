@@ -27,6 +27,12 @@ h2 {
   font-size: 12px;
 }
 
+.version {
+  margin: 4px 0 0;
+  color: #80868b;
+  font-size: 11px;
+}
+
 .controls {
   margin-top: 12px;
   display: grid;
@@ -124,6 +130,21 @@ button:disabled {
 .actions {
   display: flex;
   gap: 8px;
+}
+
+#progress-fill.indeterminate {
+  width: 100% !important;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

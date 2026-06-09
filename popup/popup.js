@@ -1,3 +1,9 @@
+import { suggestGroups, checkAiAvailability } from '../lib/ai-organizer.js';
+import {
+  applyGroupPlan,
+  getOrganizableTabs,
+} from '../lib/tab-manager.js';
+
 const COLOR_MAP = {
   grey: '#9aa0a6',
   blue: '#1a73e8',
@@ -27,11 +33,7 @@ const els = {
 };
 
 let currentPlan = null;
-let requestId = null;
-
-function sendMessage(message) {
-  return chrome.runtime.sendMessage(message);
-}
+let statusPollTimer = null;
 
 function showError(message) {
   els.errorText.textContent = message;
@@ -97,44 +99,77 @@ function renderPreview(plan, tabs) {
   els.previewSection.classList.remove('hidden');
 }
 
-async function refreshAiStatus() {
-  const result = await sendMessage({ type: 'CHECK_AI' });
-  if (!result?.ok) {
-    els.aiStatus.textContent = result?.error || '状態を取得できません';
+function setProgress(text, percent = null) {
+  els.progressSection.classList.remove('hidden');
+  els.progressText.textContent = text;
+  if (percent === null) {
+    els.progressFill.style.width = '100%';
+    els.progressFill.classList.add('indeterminate');
     return;
   }
+  els.progressFill.classList.remove('indeterminate');
+  els.progressFill.style.width = `${percent}%`;
+}
 
+function clearProgress() {
+  els.progressSection.classList.add('hidden');
+  els.progressFill.classList.remove('indeterminate');
+  els.progressFill.style.width = '0%';
+}
+
+async function refreshAiStatus() {
+  const result = await checkAiAvailability();
   els.aiStatus.textContent = result.message;
   els.analyzeBtn.disabled = result.status === 'unavailable';
+
+  if (statusPollTimer) {
+    clearTimeout(statusPollTimer);
+    statusPollTimer = null;
+  }
+
+  if (result.status === 'downloading') {
+    statusPollTimer = window.setTimeout(refreshAiStatus, 3000);
+  }
 }
 
 async function analyzeTabs() {
   clearError();
   resetPreview();
   setBusy(true);
-  requestId = crypto.randomUUID();
-
-  els.progressSection.classList.remove('hidden');
-  els.progressText.textContent = 'AI がタブを分析しています…';
-  els.progressFill.style.width = '0%';
+  setProgress('AI の準備を確認しています…', 0);
 
   try {
-    const result = await sendMessage({
-      type: 'SUGGEST_GROUPS',
-      currentWindowOnly: els.currentWindowOnly.checked,
-      requestId,
+    const tabs = await getOrganizableTabs(els.currentWindowOnly.checked);
+    const tabSummaries = tabs.map((tab) => ({
+      id: tab.id,
+      title: tab.title || 'Untitled',
+      url: tab.url || '',
+    }));
+
+    const plan = await suggestGroups(tabs, {
+      onStatus(status) {
+        if (status === 'downloading') {
+          setProgress('AI モデルをダウンロード中です。完了までお待ちください…');
+        } else if (status === 'downloadable') {
+          setProgress('AI モデルを初期化しています…', 0);
+        }
+      },
+      onDownloadProgress(percent, loaded) {
+        if (loaded >= 1) {
+          setProgress('モデルを読み込んでいます…');
+          return;
+        }
+        setProgress(`AI モデルをダウンロード中… ${percent}%`, percent);
+      },
     });
 
-    if (!result?.ok) {
-      throw new Error(result?.error || '分析に失敗しました');
-    }
-
-    currentPlan = result.plan;
-    renderPreview(result.plan, result.tabs);
+    currentPlan = plan;
+    renderPreview(plan, tabSummaries);
+    await refreshAiStatus();
   } catch (error) {
     showError(error instanceof Error ? error.message : String(error));
   } finally {
-    els.progressSection.classList.add('hidden');
+    clearProgress();
     setBusy(false);
   }
 }
@@ -148,30 +183,14 @@ async function applyGroups() {
   setBusy(true);
 
   try {
-    const result = await sendMessage({
-      type: 'APPLY_GROUPS',
-      plan: currentPlan,
-      currentWindowOnly: els.currentWindowOnly.checked,
-    });
-
-    if (!result?.ok) {
-      throw new Error(result?.error || '適用に失敗しました');
-    }
-
+    const tabs = await getOrganizableTabs(els.currentWindowOnly.checked);
+    await applyGroupPlan(tabs, currentPlan);
     window.close();
   } catch (error) {
     showError(error instanceof Error ? error.message : String(error));
     setBusy(false);
   }
 }
-
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.type !== 'DOWNLOAD_PROGRESS' || message.requestId !== requestId) {
-    return;
-  }
-  els.progressText.textContent = `AI モデルをダウンロード中… ${message.percent}%`;
-  els.progressFill.style.width = `${message.percent}%`;
-});
 
 els.analyzeBtn.addEventListener('click', analyzeTabs);
 els.applyBtn.addEventListener('click', applyGroups);
