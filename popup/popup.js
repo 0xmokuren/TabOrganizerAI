@@ -1,4 +1,11 @@
-import { suggestGroups, checkAiAvailability, UNAVAILABLE_HINTS } from '../lib/ai-organizer.js';
+import {
+  suggestGroups,
+  checkAiAvailability,
+  warmSession,
+  releaseSession,
+  isSessionReady,
+  UNAVAILABLE_HINTS,
+} from '../lib/ai-organizer.js';
 import { suggestGroupsByDomain } from '../lib/rule-based-grouper.js';
 import {
   applyGroupPlan,
@@ -23,7 +30,9 @@ const els = {
   analyzeBtn: document.getElementById('analyze-btn'),
   ruleBasedBtn: document.getElementById('rule-based-btn'),
   progressSection: document.getElementById('progress-section'),
+  progressPercent: document.getElementById('progress-percent'),
   progressText: document.getElementById('progress-text'),
+  progressDetail: document.getElementById('progress-detail'),
   progressFill: document.getElementById('progress-fill'),
   summarySection: document.getElementById('summary-section'),
   summaryText: document.getElementById('summary-text'),
@@ -38,6 +47,7 @@ const els = {
 
 let currentPlan = null;
 let statusPollTimer = null;
+let sessionWarmPromise = null;
 
 function showError(message) {
   if (!els.errorText) {
@@ -126,24 +136,51 @@ function renderPreview(plan, tabs) {
   els.previewSection?.classList.remove('hidden');
 }
 
-function setProgress(text, percent = null) {
+function setProgress(progress) {
   if (!els.progressSection || !els.progressText || !els.progressFill) {
     return;
   }
 
+  const info = typeof progress === 'string'
+    ? { message: progress, percent: 0, detail: null, phase: 'preparing' }
+    : progress;
+
   els.progressSection.classList.remove('hidden');
-  els.progressText.textContent = text;
-  if (percent === null) {
+  els.progressText.textContent = info.message ?? '';
+
+  if (els.progressDetail) {
+    if (info.detail) {
+      els.progressDetail.textContent = info.detail;
+      els.progressDetail.classList.remove('hidden');
+    } else {
+      els.progressDetail.textContent = '';
+      els.progressDetail.classList.add('hidden');
+    }
+  }
+
+  if (els.progressPercent) {
+    if (info.percent === null || info.percent === undefined) {
+      els.progressPercent.classList.add('hidden');
+    } else {
+      els.progressPercent.textContent = `${info.percent}%`;
+      els.progressPercent.classList.remove('hidden');
+    }
+  }
+
+  if (info.percent === null || info.percent === undefined) {
     els.progressFill.style.width = '100%';
     els.progressFill.classList.add('indeterminate');
     return;
   }
+
   els.progressFill.classList.remove('indeterminate');
-  els.progressFill.style.width = `${percent}%`;
+  els.progressFill.style.width = `${info.percent}%`;
 }
 
 function clearProgress() {
   els.progressSection?.classList.add('hidden');
+  els.progressPercent?.classList.add('hidden');
+  els.progressDetail?.classList.add('hidden');
   if (els.progressFill) {
     els.progressFill.classList.remove('indeterminate');
     els.progressFill.style.width = '0%';
@@ -208,7 +245,11 @@ async function refreshAiStatus() {
     const result = await checkAiAvailability();
 
     if (els.aiStatus) {
-      els.aiStatus.textContent = result.message;
+      if (sessionWarmPromise && !result.sessionReady) {
+        els.aiStatus.textContent = 'AI を準備中…';
+      } else {
+        els.aiStatus.textContent = result.message;
+      }
     }
     if (els.analyzeBtn) {
       els.analyzeBtn.disabled =
@@ -268,7 +309,23 @@ async function analyzeTabs() {
   clearError();
   resetPreview();
   setBusy(true);
-  setProgress('AI の準備を確認しています…', 0);
+
+  const sessionReady = isSessionReady();
+  if (!sessionReady) {
+    setProgress({
+      message: 'AI の準備を確認しています…',
+      percent: 0,
+      detail: '初回は約 22 GB のダウンロードが必要な場合があります',
+      phase: 'preparing',
+    });
+  } else {
+    setProgress({
+      message: 'タブを分析しています…',
+      percent: 100,
+      phase: 'analyzing',
+      detail: null,
+    });
+  }
 
   try {
     const tabs = await getOrganizableTabs(els.currentWindowOnly?.checked ?? true);
@@ -279,19 +336,11 @@ async function analyzeTabs() {
     }));
 
     const plan = await suggestGroups(tabs, {
-      onStatus(status) {
-        if (status === 'downloading') {
-          setProgress('AI モデルをダウンロード中です。完了までお待ちください…');
-        } else if (status === 'downloadable') {
-          setProgress('AI モデルを初期化しています…', 0);
-        }
-      },
-      onDownloadProgress(percent, loaded) {
-        if (loaded >= 1) {
-          setProgress('モデルを読み込んでいます…');
+      onProgress(progress) {
+        if (sessionReady && progress.phase !== 'analyzing') {
           return;
         }
-        setProgress(`AI モデルをダウンロード中… ${percent}%`, percent);
+        setProgress(progress);
       },
     });
 
@@ -356,6 +405,29 @@ function registerGlobalErrorHandlers() {
   });
 }
 
+function startSessionPrewarm() {
+  sessionWarmPromise = warmSession({
+    onProgress(progress) {
+      if (!els.aiStatus || isSessionReady()) {
+        return;
+      }
+
+      if (progress.phase === 'downloading' || progress.phase === 'background') {
+        els.aiStatus.textContent = progress.message;
+      } else if (progress.phase === 'loading' || progress.percent === 0) {
+        els.aiStatus.textContent = 'AI モデルを読み込み中…';
+      }
+    },
+  })
+    .then(async () => {
+      await refreshAiStatus();
+    })
+    .catch(handleFatalError)
+    .finally(() => {
+      sessionWarmPromise = null;
+    });
+}
+
 function init() {
   registerGlobalErrorHandlers();
   validateRequiredElements();
@@ -365,7 +437,15 @@ function init() {
   els.applyBtn?.addEventListener('click', applyGroups);
   els.cancelBtn?.addEventListener('click', resetPreview);
 
-  refreshAiStatus().catch(handleFatalError);
+  window.addEventListener('pagehide', () => {
+    releaseSession();
+  });
+
+  refreshAiStatus()
+    .then(() => {
+      startSessionPrewarm();
+    })
+    .catch(handleFatalError);
 }
 
 init();

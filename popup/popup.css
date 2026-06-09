@@ -93,9 +93,23 @@ button:disabled {
   font-size: 12px;
 }
 
+.progress-percent {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a73e8;
+  line-height: 1;
+}
+
+.progress-detail {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: #5f6368;
+}
+
 .progress-bar {
-  margin-top: 8px;
-  height: 6px;
+  margin-top: 10px;
+  height: 8px;
   background: #e8eaed;
   border-radius: 999px;
   overflow: hidden;
