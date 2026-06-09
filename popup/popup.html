@@ -10,10 +10,10 @@
     <header>
       <h1>AI Tab Organizer</h1>
       <p id="ai-status" class="status">状態を確認中…</p>
-      <p class="version">v1.0.3</p>
+      <p class="version">v1.0.4</p>
     </header>
 
-    <details id="diagnostics" class="diagnostics hidden">
+    <details id="diagnostics" class="diagnostics">
       <summary>診断情報</summary>
       <ul id="diagnostics-list"></ul>
     </details>
@@ -23,7 +23,8 @@
         <input type="checkbox" id="current-window-only" checked />
         現在のウィンドウのみ
       </label>
-      <button id="analyze-btn" type="button">タブを分析</button>
+      <button id="analyze-btn" type="button">AI で分析</button>
+      <button id="rule-based-btn" type="button">ドメインで整理</button>
     </section>
 
     <section id="progress-section" class="hidden">

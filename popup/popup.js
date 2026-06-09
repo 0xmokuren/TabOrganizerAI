@@ -1,4 +1,5 @@
 import { suggestGroups, checkAiAvailability, UNAVAILABLE_HINTS } from '../lib/ai-organizer.js';
+import { suggestGroupsByDomain } from '../lib/rule-based-grouper.js';
 import {
   applyGroupPlan,
   getOrganizableTabs,
@@ -20,6 +21,7 @@ const els = {
   aiStatus: document.getElementById('ai-status'),
   currentWindowOnly: document.getElementById('current-window-only'),
   analyzeBtn: document.getElementById('analyze-btn'),
+  ruleBasedBtn: document.getElementById('rule-based-btn'),
   progressSection: document.getElementById('progress-section'),
   progressText: document.getElementById('progress-text'),
   progressFill: document.getElementById('progress-fill'),
@@ -56,6 +58,9 @@ function clearError() {
 function setBusy(busy) {
   if (els.analyzeBtn) {
     els.analyzeBtn.disabled = busy;
+  }
+  if (els.ruleBasedBtn) {
+    els.ruleBasedBtn.disabled = busy;
   }
   if (els.applyBtn) {
     els.applyBtn.disabled = busy;
@@ -145,6 +150,15 @@ function clearProgress() {
   }
 }
 
+function appendDiagnosticItem(text) {
+  if (!els.diagnosticsList) {
+    return;
+  }
+  const item = document.createElement('li');
+  item.textContent = text;
+  els.diagnosticsList.appendChild(item);
+}
+
 function renderDiagnostics(result) {
   if (!els.diagnostics || !els.diagnosticsList) {
     return;
@@ -152,16 +166,26 @@ function renderDiagnostics(result) {
 
   els.diagnosticsList.innerHTML = '';
 
+  if (result.environmentSummary) {
+    appendDiagnosticItem(result.environmentSummary);
+  }
+
+  if (typeof result.hasLanguageModel === 'boolean') {
+    appendDiagnosticItem(
+      `LanguageModel API: ${result.hasLanguageModel ? 'あり' : 'なし'}`,
+    );
+  }
+
   if (result.probeSummary) {
-    const item = document.createElement('li');
-    item.textContent = result.probeSummary;
-    els.diagnosticsList.appendChild(item);
+    appendDiagnosticItem(result.probeSummary);
   }
 
   if (result.selectedProfile) {
-    const item = document.createElement('li');
-    item.textContent = `使用プロファイル: ${result.selectedProfile}`;
-    els.diagnosticsList.appendChild(item);
+    appendDiagnosticItem(`使用プロファイル: ${result.selectedProfile}`);
+  }
+
+  if (result.likelyBlockers?.length) {
+    appendDiagnosticItem(`想定原因: ${result.likelyBlockers.join(' / ')}`);
   }
 
   const hints = result.hints || (
@@ -172,13 +196,11 @@ function renderDiagnostics(result) {
 
   if (hints) {
     for (const hint of hints) {
-      const item = document.createElement('li');
-      item.textContent = hint;
-      els.diagnosticsList.appendChild(item);
+      appendDiagnosticItem(hint);
     }
   }
 
-  els.diagnostics.classList.toggle('hidden', els.diagnosticsList.children.length === 0);
+  els.diagnostics.open = els.diagnosticsList.children.length > 0;
 }
 
 async function refreshAiStatus() {
@@ -190,7 +212,11 @@ async function refreshAiStatus() {
     }
     if (els.analyzeBtn) {
       els.analyzeBtn.disabled =
-        result.status === 'unavailable' || result.status === 'missing-api';
+        result.status === 'unavailable' ||
+        result.status === 'missing-api';
+    }
+    if (els.ruleBasedBtn) {
+      els.ruleBasedBtn.disabled = false;
     }
 
     renderDiagnostics(result);
@@ -207,6 +233,34 @@ async function refreshAiStatus() {
     }
   } catch (error) {
     handleFatalError(error);
+  }
+}
+
+async function analyzeTabsByDomain() {
+  clearError();
+  resetPreview();
+  setBusy(true);
+
+  try {
+    const tabs = await getOrganizableTabs(els.currentWindowOnly?.checked ?? true);
+    const tabSummaries = tabs.map((tab) => ({
+      id: tab.id,
+      title: tab.title || 'Untitled',
+      url: tab.url || '',
+    }));
+
+    const plan = suggestGroupsByDomain(tabs);
+    currentPlan = plan;
+    renderPreview(plan, tabSummaries);
+
+    if (els.summaryText) {
+      els.summaryText.textContent =
+        `${plan.groups.length} グループ / ${tabs.length} タブ（ドメイン単位）`;
+    }
+  } catch (error) {
+    showError(error instanceof Error ? error.message : String(error));
+  } finally {
+    setBusy(false);
   }
 }
 
@@ -307,6 +361,7 @@ function init() {
   validateRequiredElements();
 
   els.analyzeBtn.addEventListener('click', analyzeTabs);
+  els.ruleBasedBtn?.addEventListener('click', analyzeTabsByDomain);
   els.applyBtn?.addEventListener('click', applyGroups);
   els.cancelBtn?.addEventListener('click', resetPreview);
 
