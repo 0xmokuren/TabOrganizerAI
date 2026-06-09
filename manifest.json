@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Tab Organizer",
-  "version": "1.0.6",
+  "version": "1.2.0",
   "description": "Chrome のローカル AI（Gemini Nano）でタブを自動グループ化します",
   "permissions": ["tabs", "tabGroups", "storage"],
   "action": {

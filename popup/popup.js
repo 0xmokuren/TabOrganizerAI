@@ -11,6 +11,10 @@ import {
   applyGroupPlan,
   getOrganizableTabs,
 } from '../lib/tab-manager.js';
+import {
+  loadUserInstructions,
+  saveUserInstructions,
+} from '../lib/user-prompt.js';
 
 const COLOR_MAP = {
   grey: '#9aa0a6',
@@ -33,6 +37,7 @@ const els = {
   progressPercent: document.getElementById('progress-percent'),
   progressText: document.getElementById('progress-text'),
   progressDetail: document.getElementById('progress-detail'),
+  progressStream: document.getElementById('progress-stream'),
   progressFill: document.getElementById('progress-fill'),
   summarySection: document.getElementById('summary-section'),
   summaryText: document.getElementById('summary-text'),
@@ -43,11 +48,14 @@ const els = {
   errorText: document.getElementById('error-text'),
   diagnostics: document.getElementById('diagnostics'),
   diagnosticsList: document.getElementById('diagnostics-list'),
+  userPromptInput: document.getElementById('user-prompt-input'),
+  userPromptStatus: document.getElementById('user-prompt-status'),
 };
 
 let currentPlan = null;
 let statusPollTimer = null;
 let sessionWarmPromise = null;
+let userPromptSaveTimer = null;
 
 function showError(message) {
   if (!els.errorText) {
@@ -65,6 +73,62 @@ function clearError() {
   els.errorText.classList.add('hidden');
 }
 
+function setUserPromptStatus(message) {
+  if (els.userPromptStatus) {
+    els.userPromptStatus.textContent = message;
+  }
+}
+
+function getUserInstructionsFromInput() {
+  return els.userPromptInput?.value ?? '';
+}
+
+async function persistUserInstructions(showSavedMessage = true) {
+  if (!els.userPromptInput) {
+    return '';
+  }
+
+  const saved = await saveUserInstructions(getUserInstructionsFromInput());
+  els.userPromptInput.value = saved;
+
+  if (showSavedMessage) {
+    setUserPromptStatus(saved ? '方針を保存しました' : '方針をクリアしました');
+  }
+
+  return saved;
+}
+
+function scheduleUserInstructionsSave() {
+  if (userPromptSaveTimer) {
+    clearTimeout(userPromptSaveTimer);
+  }
+
+  setUserPromptStatus('保存中…');
+  userPromptSaveTimer = window.setTimeout(() => {
+    persistUserInstructions(true).catch(handleFatalError);
+    userPromptSaveTimer = null;
+  }, 400);
+}
+
+async function initUserPromptSettings() {
+  if (!els.userPromptInput) {
+    return;
+  }
+
+  const saved = await loadUserInstructions();
+  els.userPromptInput.value = saved;
+  setUserPromptStatus(saved ? '保存済みの方針を読み込みました' : '');
+
+  els.userPromptInput.addEventListener('input', scheduleUserInstructionsSave);
+  els.userPromptInput.addEventListener('blur', () => {
+    if (userPromptSaveTimer) {
+      clearTimeout(userPromptSaveTimer);
+      userPromptSaveTimer = null;
+    }
+    persistUserInstructions(true).catch(handleFatalError);
+  });
+}
+
 function setBusy(busy) {
   if (els.analyzeBtn) {
     els.analyzeBtn.disabled = busy;
@@ -77,6 +141,9 @@ function setBusy(busy) {
   }
   if (els.currentWindowOnly) {
     els.currentWindowOnly.disabled = busy;
+  }
+  if (els.userPromptInput) {
+    els.userPromptInput.disabled = busy;
   }
 }
 
@@ -167,6 +234,16 @@ function setProgress(progress) {
     }
   }
 
+  if (els.progressStream) {
+    if (info.streamPreview) {
+      els.progressStream.textContent = info.streamPreview;
+      els.progressStream.classList.remove('hidden');
+    } else {
+      els.progressStream.textContent = '';
+      els.progressStream.classList.add('hidden');
+    }
+  }
+
   if (info.percent === null || info.percent === undefined) {
     els.progressFill.style.width = '100%';
     els.progressFill.classList.add('indeterminate');
@@ -181,6 +258,10 @@ function clearProgress() {
   els.progressSection?.classList.add('hidden');
   els.progressPercent?.classList.add('hidden');
   els.progressDetail?.classList.add('hidden');
+  if (els.progressStream) {
+    els.progressStream.textContent = '';
+    els.progressStream.classList.add('hidden');
+  }
   if (els.progressFill) {
     els.progressFill.classList.remove('indeterminate');
     els.progressFill.style.width = '0%';
@@ -219,6 +300,14 @@ function renderDiagnostics(result) {
 
   if (result.selectedProfile) {
     appendDiagnosticItem(`使用プロファイル: ${result.selectedProfile}`);
+  }
+
+  if (result.outputLanguageLabel) {
+    appendDiagnosticItem(`AI 出力言語: ${result.outputLanguageLabel} (${result.outputLanguage})`);
+  }
+
+  if (result.browserLocales?.length) {
+    appendDiagnosticItem(`ブラウザ言語: ${result.browserLocales.join(', ')}`);
   }
 
   if (result.likelyBlockers?.length) {
@@ -320,10 +409,11 @@ async function analyzeTabs() {
     });
   } else {
     setProgress({
-      message: 'タブを分析しています…',
-      percent: 100,
-      phase: 'analyzing',
-      detail: null,
+      message: 'AI が考え中…',
+      percent: null,
+      phase: 'streaming',
+      detail: '応答を待っています',
+      streamPreview: '',
     });
   }
 
@@ -335,9 +425,14 @@ async function analyzeTabs() {
       url: tab.url || '',
     }));
 
+    const userInstructions = await persistUserInstructions(false);
+
     const plan = await suggestGroups(tabs, {
+      userInstructions,
       onProgress(progress) {
-        if (sessionReady && progress.phase !== 'analyzing') {
+        const showDuringAnalyze = progress.phase === 'analyzing'
+          || progress.phase === 'streaming';
+        if (sessionReady && !showDuringAnalyze) {
           return;
         }
         setProgress(progress);
@@ -442,7 +537,8 @@ function init() {
   });
 
   refreshAiStatus()
-    .then(() => {
+    .then(async () => {
+      await initUserPromptSettings();
       startSessionPrewarm();
     })
     .catch(handleFatalError);

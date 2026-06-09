@@ -10,12 +10,26 @@
     <header>
       <h1>AI Tab Organizer</h1>
       <p id="ai-status" class="status">状態を確認中…</p>
-      <p class="version">v1.0.6</p>
+      <p class="version">v1.2.0</p>
     </header>
 
     <details id="diagnostics" class="diagnostics">
       <summary>診断情報</summary>
       <ul id="diagnostics-list"></ul>
+    </details>
+
+    <details id="user-prompt-section" class="user-prompt">
+      <summary>グループ化の方針（任意）</summary>
+      <p class="user-prompt-help">
+        仕事用タブとプライベートを分ける、買い物関連をまとめる、などの希望を書けます。内容はこのブラウザにのみ保存されます。
+      </p>
+      <textarea
+        id="user-prompt-input"
+        rows="3"
+        maxlength="500"
+        placeholder="例: 仕事関連は青系、ニュースは1グループ、ショッピングはドメインごと"
+      ></textarea>
+      <p id="user-prompt-status" class="user-prompt-status" aria-live="polite"></p>
     </details>
 
     <section class="controls">
@@ -31,6 +45,7 @@
       <p id="progress-percent" class="progress-percent hidden"></p>
       <p id="progress-text">AI を準備しています…</p>
       <p id="progress-detail" class="progress-detail hidden"></p>
+      <pre id="progress-stream" class="progress-stream hidden" aria-live="polite"></pre>
       <div class="progress-bar">
         <div id="progress-fill"></div>
       </div>
