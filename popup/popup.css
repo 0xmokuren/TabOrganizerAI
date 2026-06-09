@@ -33,6 +33,21 @@ h2 {
   font-size: 11px;
 }
 
+.diagnostics {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #5f6368;
+}
+
+.diagnostics ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.diagnostics li {
+  margin-bottom: 4px;
+}
+
 .controls {
   margin-top: 12px;
   display: grid;

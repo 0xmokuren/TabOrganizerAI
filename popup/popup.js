@@ -1,4 +1,4 @@
-import { suggestGroups, checkAiAvailability } from '../lib/ai-organizer.js';
+import { suggestGroups, checkAiAvailability, UNAVAILABLE_HINTS } from '../lib/ai-organizer.js';
 import {
   applyGroupPlan,
   getOrganizableTabs,
@@ -30,6 +30,8 @@ const els = {
   applyBtn: document.getElementById('apply-btn'),
   cancelBtn: document.getElementById('cancel-btn'),
   errorText: document.getElementById('error-text'),
+  diagnostics: document.getElementById('diagnostics'),
+  diagnosticsList: document.getElementById('diagnostics-list'),
 };
 
 let currentPlan = null;
@@ -117,10 +119,45 @@ function clearProgress() {
   els.progressFill.style.width = '0%';
 }
 
+function renderDiagnostics(result) {
+  els.diagnosticsList.innerHTML = '';
+
+  if (result.probeSummary) {
+    const item = document.createElement('li');
+    item.textContent = result.probeSummary;
+    els.diagnosticsList.appendChild(item);
+  }
+
+  if (result.selectedProfile) {
+    const item = document.createElement('li');
+    item.textContent = `使用プロファイル: ${result.selectedProfile}`;
+    els.diagnosticsList.appendChild(item);
+  }
+
+  const hints = result.hints || (
+    result.status === 'unavailable' || result.status === 'missing-api'
+      ? UNAVAILABLE_HINTS
+      : null
+  );
+
+  if (hints) {
+    for (const hint of hints) {
+      const item = document.createElement('li');
+      item.textContent = hint;
+      els.diagnosticsList.appendChild(item);
+    }
+  }
+
+  els.diagnostics.classList.toggle('hidden', els.diagnosticsList.children.length === 0);
+}
+
 async function refreshAiStatus() {
   const result = await checkAiAvailability();
   els.aiStatus.textContent = result.message;
-  els.analyzeBtn.disabled = result.status === 'unavailable';
+  els.analyzeBtn.disabled =
+    result.status === 'unavailable' || result.status === 'missing-api';
+
+  renderDiagnostics(result);
 
   if (statusPollTimer) {
     clearTimeout(statusPollTimer);
