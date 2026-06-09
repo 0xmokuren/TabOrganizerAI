@@ -12,6 +12,7 @@ const zipPath = join(distDir, zipFileName);
 
 const includePaths = [
   'manifest.json',
+  '_locales',
   'background',
   'lib',
   'popup',

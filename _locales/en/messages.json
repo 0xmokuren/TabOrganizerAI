@@ -1,0 +1,652 @@
+{
+  "extensionName": {
+    "message": "Tab Cluster AI"
+  },
+  "extensionDescription": {
+    "message": "Tab Cluster AI — automatically group tabs with on-device AI or the Gemini API"
+  },
+  "actionTitle": {
+    "message": "Tab Cluster AI"
+  },
+  "ariaAiProvider": {
+    "message": "AI provider"
+  },
+  "ariaAnalysisMethod": {
+    "message": "Analysis method"
+  },
+  "providerOnDevice": {
+    "message": "On-device"
+  },
+  "providerGeminiApi": {
+    "message": "Gemini API"
+  },
+  "statusChecking": {
+    "message": "Checking status…"
+  },
+  "apiSettingsSummary": {
+    "message": "API settings"
+  },
+  "apiSettingsHelp": {
+    "message": "Tab titles and URLs are sent to Google servers. Your API key is stored only in this browser."
+  },
+  "apiKeyLabel": {
+    "message": "API key"
+  },
+  "apiKeyPlaceholder": {
+    "message": "Google AI Studio API key"
+  },
+  "getApiKeyLink": {
+    "message": "Get an API key from Google AI Studio"
+  },
+  "modelLabel": {
+    "message": "Model"
+  },
+  "diagnosticsSummary": {
+    "message": "Diagnostics"
+  },
+  "userPromptSummary": {
+    "message": "Grouping preferences (optional)"
+  },
+  "userPromptHelp": {
+    "message": "Describe how you want tabs grouped, e.g. separate work and personal, group shopping by domain. Saved only in this browser."
+  },
+  "userPromptPlaceholder": {
+    "message": "e.g. work tabs in blue, news in one group, shopping by domain"
+  },
+  "currentWindowOnly": {
+    "message": "Current window only"
+  },
+  "analyzeWithAi": {
+    "message": "Analyze with AI"
+  },
+  "organizeByDomain": {
+    "message": "Organize by domain"
+  },
+  "preparingAi": {
+    "message": "Preparing AI…"
+  },
+  "previewHeading": {
+    "message": "Suggested preview"
+  },
+  "applyGroups": {
+    "message": "Apply groups"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "apiKeyRequired": {
+    "message": "Please set an API key"
+  },
+  "statusAvailable": {
+    "message": "Available"
+  },
+  "modelDetail": {
+    "message": "Model: $MODEL$",
+    "placeholders": {
+      "model": {
+        "content": "$1",
+        "example": "Gemini 3.5 Flash"
+      }
+    }
+  },
+  "localAiDetail": {
+    "message": "Local AI (Gemini Nano)"
+  },
+  "aiPreparing": {
+    "message": "Preparing AI…"
+  },
+  "policySaved": {
+    "message": "Preferences saved"
+  },
+  "policyCleared": {
+    "message": "Preferences cleared"
+  },
+  "saving": {
+    "message": "Saving…"
+  },
+  "apiKeySaved": {
+    "message": "API key saved"
+  },
+  "apiKeyCleared": {
+    "message": "API key cleared"
+  },
+  "modelSaved": {
+    "message": "Model saved"
+  },
+  "savedPolicyLoaded": {
+    "message": "Loaded saved preferences"
+  },
+  "planSummary": {
+    "message": "$COUNT$ groups / $TABS$ tabs",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      },
+      "tabs": {
+        "content": "$2",
+        "example": "12"
+      }
+    }
+  },
+  "planAnalyzed": {
+    "message": "$SUMMARY$ analyzed",
+    "placeholders": {
+      "summary": {
+        "content": "$1",
+        "example": "3 groups / 12 tabs"
+      }
+    }
+  },
+  "planAllMerged": {
+    "message": "$SUMMARY$ (all merged into existing groups)",
+    "placeholders": {
+      "summary": {
+        "content": "$1",
+        "example": "3 groups / 12 tabs"
+      }
+    }
+  },
+  "planMergeCreate": {
+    "message": "$SUMMARY$ ($MERGE$ merged · $CREATE$ new)",
+    "placeholders": {
+      "summary": {
+        "content": "$1",
+        "example": "3 groups / 12 tabs"
+      },
+      "merge": {
+        "content": "$2",
+        "example": "2"
+      },
+      "create": {
+        "content": "$3",
+        "example": "1"
+      }
+    }
+  },
+  "groupTabCount": {
+    "message": "$NAME$ ($COUNT$ tabs)",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "News"
+      },
+      "count": {
+        "content": "$2",
+        "example": "4"
+      }
+    }
+  },
+  "mergeExisting": {
+    "message": "→ existing \"$TITLE$\"",
+    "placeholders": {
+      "title": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "badgeNew": {
+    "message": "New"
+  },
+  "diagProviderGemini": {
+    "message": "Provider: Gemini API"
+  },
+  "diagModel": {
+    "message": "Model: $MODEL$",
+    "placeholders": {
+      "model": {
+        "content": "$1",
+        "example": "Gemini 3.5 Flash"
+      }
+    }
+  },
+  "diagLanguageModelApi": {
+    "message": "LanguageModel API: $STATUS$",
+    "placeholders": {
+      "status": {
+        "content": "$1",
+        "example": "available"
+      }
+    }
+  },
+  "diagYes": {
+    "message": "yes"
+  },
+  "diagNo": {
+    "message": "no"
+  },
+  "diagProfile": {
+    "message": "Profile: $PROFILE$",
+    "placeholders": {
+      "profile": {
+        "content": "$1",
+        "example": "en"
+      }
+    }
+  },
+  "diagOutputLanguage": {
+    "message": "AI output language: $LABEL$ ($CODE$)",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "English"
+      },
+      "code": {
+        "content": "$2",
+        "example": "en"
+      }
+    }
+  },
+  "diagBrowserLocales": {
+    "message": "Browser languages: $LOCALES$",
+    "placeholders": {
+      "locales": {
+        "content": "$1",
+        "example": "en-US, ja"
+      }
+    }
+  },
+  "diagLikelyBlockers": {
+    "message": "Likely causes: $BLOCKERS$",
+    "placeholders": {
+      "blockers": {
+        "content": "$1",
+        "example": "Update Chrome"
+      }
+    }
+  },
+  "geminiApiAnalyzing": {
+    "message": "Analyzing with Gemini API…"
+  },
+  "checkingAiReadiness": {
+    "message": "Checking AI readiness…"
+  },
+  "firstDownloadHint": {
+    "message": "First run may require downloading about 22 GB"
+  },
+  "aiThinking": {
+    "message": "AI is thinking…"
+  },
+  "waitingForResponse": {
+    "message": "Waiting for response"
+  },
+  "errorNoGroupableTabsHint": {
+    "message": "Try writing grouping preferences or use Organize by domain."
+  },
+  "initFailed": {
+    "message": "Failed to initialize extension"
+  },
+  "errorUiElementNotFound": {
+    "message": "UI element not found: $KEY$",
+    "placeholders": {
+      "key": {
+        "content": "$1",
+        "example": "analyzeBtn"
+      }
+    }
+  },
+  "loadingAiModel": {
+    "message": "Loading AI model…"
+  },
+  "statusUnavailable": {
+    "message": "Chrome blocked Prompt API on this device (see diagnostics below)"
+  },
+  "statusDownloadable": {
+    "message": "Starting model download (about 22 GB, may take minutes to tens of minutes)"
+  },
+  "statusDownloading": {
+    "message": "Downloading AI model. Keep this window open…"
+  },
+  "statusReady": {
+    "message": "AI ready"
+  },
+  "hintRamDisk": {
+    "message": "Requires 16 GB+ RAM, 22 GB+ free disk, and unmetered network (e.g. Wi‑Fi)"
+  },
+  "hintFlagsOptimization": {
+    "message": "chrome://flags → optimization-guide-on-device-model Enabled (BypassPerfRequirement optional for dev)"
+  },
+  "hintFlagsPromptApi": {
+    "message": "chrome://flags → prompt-api-for-gemini-nano Enabled multilingual"
+  },
+  "hintOnDeviceInternals": {
+    "message": "chrome://on-device-internals → check Model Status for errors"
+  },
+  "hintRestartChrome": {
+    "message": "Restart Chrome and try again"
+  },
+  "probeSummaryNone": {
+    "message": "No diagnostics"
+  },
+  "probeError": {
+    "message": "$LABEL$: error ($ERROR$)",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "en"
+      },
+      "error": {
+        "content": "$2",
+        "example": "timeout"
+      }
+    }
+  },
+  "probeStatus": {
+    "message": "$LABEL$: $STATUS$",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "en"
+      },
+      "status": {
+        "content": "$2",
+        "example": "available"
+      }
+    }
+  },
+  "missingPromptApi": {
+    "message": "Prompt API is not available in this Chrome (Chrome 138+ required)"
+  },
+  "downloadTimeout": {
+    "message": "Model download timed out. Restart Chrome and try again"
+  },
+  "outputLanguageError": {
+    "message": "AI output language configuration error. Reload the extension and try again."
+  },
+  "sessionStartFailed": {
+    "message": "Could not start AI session. Check Model Status at chrome://on-device-internals and ensure Settings → System → on-device AI is ON."
+  },
+  "progressRetryAlternate": {
+    "message": "Retrying with alternate method"
+  },
+  "progressRetrySimple": {
+    "message": "Retrying with simplified format"
+  },
+  "progressOrganizing": {
+    "message": "Organizing results…"
+  },
+  "errorMinTabs": {
+    "message": "At least 2 ungrouped tabs are required to group"
+  },
+  "errorMaxTabs": {
+    "message": "You can organize up to $MAX$ tabs at once (currently $CURRENT$ tabs)",
+    "placeholders": {
+      "max": {
+        "content": "$1",
+        "example": "100"
+      },
+      "current": {
+        "content": "$2",
+        "example": "150"
+      }
+    }
+  },
+  "diagnosticsPrefix": {
+    "message": "Diagnostics: $TEXT$",
+    "placeholders": {
+      "text": {
+        "content": "$1",
+        "example": "en: available"
+      }
+    }
+  },
+  "sessionRecreating": {
+    "message": "Recreating AI session…"
+  },
+  "sessionRetryInternal": {
+    "message": "Retrying after internal error"
+  },
+  "unknownChromeAiError": {
+    "message": "A Chrome internal error occurred during AI processing. Reload the extension or reduce the number of tabs and try again. If it persists, check Model Status at chrome://on-device-internals and restart Chrome."
+  },
+  "geminiBadRequest": {
+    "message": "Invalid request: $MSG$",
+    "placeholders": {
+      "msg": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
+    }
+  },
+  "geminiBadRequestGeneric": {
+    "message": "Invalid request. Reduce the number of tabs and try again."
+  },
+  "geminiInvalidKey": {
+    "message": "Invalid API key. Check your key in Google AI Studio."
+  },
+  "geminiModelUnavailable": {
+    "message": "Selected model is unavailable. Choose another model in settings."
+  },
+  "geminiRateLimit": {
+    "message": "Rate limit reached. Wait and try again, or check usage limits in AI Studio."
+  },
+  "geminiUnavailable": {
+    "message": "Gemini API is temporarily unavailable. Wait and try again."
+  },
+  "geminiError": {
+    "message": "Gemini API error ($STATUS$): $MSG$",
+    "placeholders": {
+      "status": {
+        "content": "$1",
+        "example": "500"
+      },
+      "msg": {
+        "content": "$2",
+        "example": "Internal error"
+      }
+    }
+  },
+  "geminiErrorStatus": {
+    "message": "Gemini API error ($STATUS$)",
+    "placeholders": {
+      "status": {
+        "content": "$1",
+        "example": "500"
+      }
+    }
+  },
+  "geminiNetworkError": {
+    "message": "Could not connect to Gemini API. Check your network connection."
+  },
+  "geminiEmptyResponse": {
+    "message": "Gemini API returned an empty response"
+  },
+  "geminiApiAvailable": {
+    "message": "Gemini API available ($MODEL$)",
+    "placeholders": {
+      "model": {
+        "content": "$1",
+        "example": "Gemini 3.5 Flash"
+      }
+    }
+  },
+  "errorInvalidAiResponse": {
+    "message": "AI response format is invalid"
+  },
+  "errorNoGroupableTabs": {
+    "message": "No groupable tabs found"
+  },
+  "errorNoApplicableGroups": {
+    "message": "No groups could be applied"
+  },
+  "errorSameDomainMinTabs": {
+    "message": "Could not find at least 2 tabs from the same domain"
+  },
+  "untitledTab": {
+    "message": "Untitled"
+  },
+  "untitledGroup": {
+    "message": "(Untitled)"
+  },
+  "progressLoadingModel": {
+    "message": "Loading model…"
+  },
+  "progressLoadingDetail": {
+    "message": "Download complete. Loading into memory"
+  },
+  "progressDownloading": {
+    "message": "Downloading AI model… $PERCENT$%",
+    "placeholders": {
+      "percent": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  },
+  "progressDownloadDetail": {
+    "message": "About $DOWNLOADED$ / $TOTAL$ GB (estimate)",
+    "placeholders": {
+      "downloaded": {
+        "content": "$1",
+        "example": "5.2 GB"
+      },
+      "total": {
+        "content": "$2",
+        "example": "22"
+      }
+    }
+  },
+  "progressBackgroundDownloading": {
+    "message": "Chrome is downloading the model in the background…"
+  },
+  "progressBackgroundDetail": {
+    "message": "Elapsed $ELAPSED$ / about $TOTAL$ GB · may take minutes to tens of minutes",
+    "placeholders": {
+      "elapsed": {
+        "content": "$1",
+        "example": "2m 30s"
+      },
+      "total": {
+        "content": "$2",
+        "example": "22"
+      }
+    }
+  },
+  "timeMinutesSeconds": {
+    "message": "$MIN$m $SEC$s",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "2"
+      },
+      "sec": {
+        "content": "$2",
+        "example": "30"
+      }
+    }
+  },
+  "timeSeconds": {
+    "message": "$SEC$s",
+    "placeholders": {
+      "sec": {
+        "content": "$1",
+        "example": "30"
+      }
+    }
+  },
+  "envUnknown": {
+    "message": "unknown"
+  },
+  "envMemoryUnknown": {
+    "message": "unknown (not exposed by Chrome)"
+  },
+  "envMemoryRef": {
+    "message": "$GB$ GB (reference)",
+    "placeholders": {
+      "gb": {
+        "content": "$1",
+        "example": "16"
+      }
+    }
+  },
+  "envChromeOld": {
+    "message": " (may be below 138)"
+  },
+  "envSummary": {
+    "message": "Chrome $VERSION$$OLD$ / OS: $OS$ / Memory: $MEMORY$ / CPU cores: $CORES$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "138.0.0.0"
+      },
+      "old": {
+        "content": "$2",
+        "example": ""
+      },
+      "os": {
+        "content": "$3",
+        "example": "MacIntel"
+      },
+      "memory": {
+        "content": "$4",
+        "example": "16 GB"
+      },
+      "cores": {
+        "content": "$5",
+        "example": "8"
+      }
+    }
+  },
+  "blockerChromeUpdate": {
+    "message": "Update to Chrome 138 or later"
+  },
+  "blockerLowMemory": {
+    "message": "Memory reference is $GB$ GB (Prompt API requires 16 GB+)",
+    "placeholders": {
+      "gb": {
+        "content": "$1",
+        "example": "8"
+      }
+    }
+  },
+  "blockerLowCores": {
+    "message": "CPU cores: $COUNT$ (4+ required)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "blockerOffline": {
+    "message": "Offline (network required for initial model download)"
+  },
+  "blockerTryBypassPerf": {
+    "message": "Hardware requirements may be met. Try BypassPerfRequirement at chrome://flags"
+  },
+  "langDe": {
+    "message": "German"
+  },
+  "langEn": {
+    "message": "English"
+  },
+  "langEs": {
+    "message": "Spanish"
+  },
+  "langFr": {
+    "message": "French"
+  },
+  "langJa": {
+    "message": "Japanese"
+  },
+  "languageCandidateLabel": {
+    "message": "$LABEL$ output (browser: $CODE$)",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "English"
+      },
+      "code": {
+        "content": "$2",
+        "example": "en"
+      }
+    }
+  },
+  "errorEmptyAiResponse": {
+    "message": "AI returned an empty response"
+  },
+  "errorInvalidJson": {
+    "message": "Could not parse AI response as JSON"
+  }
+}
