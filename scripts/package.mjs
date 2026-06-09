@@ -1,11 +1,14 @@
-import { cpSync, mkdirSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const stagingDir = join(root, 'dist', 'TabOrganizerAI');
-const zipPath = join(root, 'dist', 'TabOrganizerAI.zip');
+const distDir = join(root, 'dist');
+const stagingDir = join(distDir, 'TabOrganizerAI');
+const { version } = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
+const zipFileName = `TabOrganizerAI-${version}.zip`;
+const zipPath = join(distDir, zipFileName);
 
 const includePaths = [
   'manifest.json',
@@ -15,12 +18,17 @@ const includePaths = [
   'icons',
 ];
 
-rmSync(join(root, 'dist'), { recursive: true, force: true });
+rmSync(distDir, { recursive: true, force: true });
 mkdirSync(stagingDir, { recursive: true });
 
 for (const path of includePaths) {
   cpSync(join(root, path), join(stagingDir, path), { recursive: true });
 }
 
-execFileSync('zip', ['-r', zipPath, '.'], { cwd: stagingDir });
-console.log(`package: ${zipPath}`);
+execFileSync('zip', ['-r', join('..', zipFileName), '.'], { cwd: stagingDir });
+
+if (!existsSync(zipPath)) {
+  throw new Error(`ビルド成果物が見つかりません: ${zipPath}`);
+}
+
+console.log(`build: ${zipPath}`);
