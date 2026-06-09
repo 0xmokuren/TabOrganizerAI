@@ -2,7 +2,7 @@ import {
   warmSession,
   releaseSession,
   isSessionReady,
-  UNAVAILABLE_HINTS,
+  getUnavailableHints,
 } from '../lib/ai-organizer.js';
 import {
   suggestGroupsForProvider,
@@ -26,6 +26,12 @@ import {
   saveGeminiApiModel,
 } from '../lib/ai-provider-settings.js';
 import { GEMINI_API_MODELS } from '../lib/gemini-models.js';
+import { applyStaticI18n, t } from '../lib/i18n.js';
+import {
+  AppError,
+  ErrorCode,
+  getDisplayError,
+} from '../lib/errors.js';
 
 const COLOR_MAP = {
   grey: '#9aa0a6',
@@ -155,15 +161,15 @@ function resolveStatusPresentation(result, settings) {
   if (result.provider === AI_PROVIDERS.GEMINI_API) {
     if (result.status === 'missing-key') {
       return {
-        message: 'API キーを設定してください',
-        detail: result.modelLabel ? `モデル: ${result.modelLabel}` : null,
+        message: t('apiKeyRequired'),
+        detail: result.modelLabel ? t('modelDetail', result.modelLabel) : null,
         dot: 'error',
       };
     }
 
     return {
-      message: '利用可能',
-      detail: result.modelLabel ? `モデル: ${result.modelLabel}` : null,
+      message: t('statusAvailable'),
+      detail: result.modelLabel ? t('modelDetail', result.modelLabel) : null,
       dot: 'ready',
     };
   }
@@ -171,7 +177,7 @@ function resolveStatusPresentation(result, settings) {
   if (result.status === 'unavailable' || result.status === 'missing-api' || result.status === 'error') {
     return {
       message: result.message,
-      detail: 'ローカル AI（Gemini Nano）',
+      detail: t('localAiDetail'),
       dot: 'error',
     };
   }
@@ -182,8 +188,8 @@ function resolveStatusPresentation(result, settings) {
     && !result.sessionReady
   ) {
     return {
-      message: 'AI を準備中…',
-      detail: 'ローカル AI（Gemini Nano）',
+      message: t('aiPreparing'),
+      detail: t('localAiDetail'),
       dot: 'pending',
     };
   }
@@ -191,14 +197,14 @@ function resolveStatusPresentation(result, settings) {
   if (result.status === 'downloading') {
     return {
       message: result.message,
-      detail: 'ローカル AI（Gemini Nano）',
+      detail: t('localAiDetail'),
       dot: 'pending',
     };
   }
 
   return {
     message: result.message,
-    detail: 'ローカル AI（Gemini Nano）',
+    detail: t('localAiDetail'),
     dot: result.sessionReady || result.status === 'available' || result.status === 'ready'
       ? 'ready'
       : 'pending',
@@ -222,7 +228,7 @@ async function persistUserInstructions(showSavedMessage = true) {
   els.userPromptInput.value = saved;
 
   if (showSavedMessage) {
-    setUserPromptStatus(saved ? '方針を保存しました' : '方針をクリアしました');
+    setUserPromptStatus(saved ? t('policySaved') : t('policyCleared'));
   }
 
   return saved;
@@ -233,7 +239,7 @@ function scheduleUserInstructionsSave() {
     clearTimeout(userPromptSaveTimer);
   }
 
-  setUserPromptStatus('保存中…');
+  setUserPromptStatus(t('saving'));
   userPromptSaveTimer = window.setTimeout(() => {
     persistUserInstructions(true).catch(handleFatalError);
     userPromptSaveTimer = null;
@@ -253,7 +259,7 @@ async function persistGeminiApiKey(showSavedMessage = true) {
   };
 
   if (showSavedMessage) {
-    setAiProviderStatus(saved ? 'API キーを保存しました' : 'API キーをクリアしました');
+    setAiProviderStatus(saved ? t('apiKeySaved') : t('apiKeyCleared'));
   }
 
   await refreshAiStatus();
@@ -265,7 +271,7 @@ function scheduleGeminiApiKeySave() {
     clearTimeout(apiKeySaveTimer);
   }
 
-  setAiProviderStatus('保存中…');
+  setAiProviderStatus(t('saving'));
   apiKeySaveTimer = window.setTimeout(() => {
     persistGeminiApiKey(true).catch(handleFatalError);
     apiKeySaveTimer = null;
@@ -298,7 +304,7 @@ async function persistGeminiApiModel() {
     ...currentSettings,
     geminiApiModel: saved,
   };
-  setAiProviderStatus('モデルを保存しました');
+  setAiProviderStatus(t('modelSaved'));
   await refreshAiStatus();
   return saved;
 }
@@ -327,7 +333,7 @@ async function initUserPromptSettings() {
 
   const saved = await loadUserInstructions();
   els.userPromptInput.value = saved;
-  setUserPromptStatus(saved ? '保存済みの方針を読み込みました' : '');
+  setUserPromptStatus(saved ? t('savedPolicyLoaded') : '');
 
   els.userPromptInput.addEventListener('input', scheduleUserInstructionsSave);
   els.userPromptInput.addEventListener('blur', () => {
@@ -416,18 +422,27 @@ function resetPreview() {
 }
 
 function formatPlanSummary(plan, tabCount) {
-  const base = `${plan.groups.length} グループ / ${tabCount} タブ`;
+  const base = t(
+    'planSummary',
+    String(plan.groups.length),
+    String(tabCount),
+  );
   const summary = plan.mergeSummary;
 
   if (!summary?.merge) {
-    return `${base} を分析しました`;
+    return t('planAnalyzed', base);
   }
 
   if (summary.create === 0) {
-    return `${base}（すべて既存グループに統合）`;
+    return t('planAllMerged', base);
   }
 
-  return `${base}（既存に ${summary.merge}・新規 ${summary.create}）`;
+  return t(
+    'planMergeCreate',
+    base,
+    String(summary.merge),
+    String(summary.create),
+  );
 }
 
 function renderPreview(plan, tabs) {
@@ -450,13 +465,17 @@ function renderPreview(plan, tabs) {
     dot.style.background = COLOR_MAP[displayColor] || COLOR_MAP.blue;
 
     const title = document.createElement('span');
-    title.textContent = `${group.name} (${group.tabIndices.length} タブ)`;
+    title.textContent = t(
+      'groupTabCount',
+      group.name,
+      String(group.tabIndices.length),
+    );
 
     const badge = document.createElement('span');
     badge.className = `group-action ${group.mergeTarget ? 'merge' : 'create'}`;
     badge.textContent = group.mergeTarget
-      ? `→ 既存「${group.mergeTarget.title}」`
-      : '新規';
+      ? t('mergeExisting', group.mergeTarget.title)
+      : t('badgeNew');
 
     header.appendChild(dot);
     header.appendChild(title);
@@ -567,9 +586,9 @@ function renderDiagnostics(result) {
   els.diagnosticsList.innerHTML = '';
 
   if (result.provider === AI_PROVIDERS.GEMINI_API) {
-    appendDiagnosticItem('プロバイダ: Gemini API');
+    appendDiagnosticItem(t('diagProviderGemini'));
     if (result.modelLabel) {
-      appendDiagnosticItem(`モデル: ${result.modelLabel}`);
+      appendDiagnosticItem(t('diagModel', result.modelLabel));
     }
     return;
   }
@@ -580,7 +599,10 @@ function renderDiagnostics(result) {
 
   if (typeof result.hasLanguageModel === 'boolean') {
     appendDiagnosticItem(
-      `LanguageModel API: ${result.hasLanguageModel ? 'あり' : 'なし'}`,
+      t(
+        'diagLanguageModelApi',
+        result.hasLanguageModel ? t('diagYes') : t('diagNo'),
+      ),
     );
   }
 
@@ -589,24 +611,26 @@ function renderDiagnostics(result) {
   }
 
   if (result.selectedProfile) {
-    appendDiagnosticItem(`使用プロファイル: ${result.selectedProfile}`);
+    appendDiagnosticItem(t('diagProfile', result.selectedProfile));
   }
 
   if (result.outputLanguageLabel) {
-    appendDiagnosticItem(`AI 出力言語: ${result.outputLanguageLabel} (${result.outputLanguage})`);
+    appendDiagnosticItem(
+      t('diagOutputLanguage', result.outputLanguageLabel, result.outputLanguage),
+    );
   }
 
   if (result.browserLocales?.length) {
-    appendDiagnosticItem(`ブラウザ言語: ${result.browserLocales.join(', ')}`);
+    appendDiagnosticItem(t('diagBrowserLocales', result.browserLocales.join(', ')));
   }
 
   if (result.likelyBlockers?.length) {
-    appendDiagnosticItem(`想定原因: ${result.likelyBlockers.join(' / ')}`);
+    appendDiagnosticItem(t('diagLikelyBlockers', result.likelyBlockers.join(' / ')));
   }
 
   const hints = result.hints || (
     result.status === 'unavailable' || result.status === 'missing-api'
-      ? UNAVAILABLE_HINTS
+      ? getUnavailableHints()
       : null
   );
 
@@ -684,7 +708,7 @@ async function analyzeTabsByDomain() {
     const tabs = await getOrganizableTabs(els.currentWindowOnly?.checked ?? true);
     const tabSummaries = tabs.map((tab) => ({
       id: tab.id,
-      title: tab.title || 'Untitled',
+      title: tab.title || t('untitledTab'),
       url: tab.url || '',
     }));
 
@@ -697,7 +721,7 @@ async function analyzeTabsByDomain() {
     currentPlan = plan;
     renderPreview(plan, tabSummaries);
   } catch (error) {
-    showError(error instanceof Error ? error.message : String(error));
+    showError(getDisplayError(error));
   } finally {
     setBusy(false);
     await refreshAiStatus();
@@ -715,24 +739,24 @@ async function analyzeTabs() {
 
   if (useGeminiApi) {
     setProgress({
-      message: 'Gemini API で分析中…',
+      message: t('geminiApiAnalyzing'),
       percent: null,
       phase: 'analyzing',
       detail: null,
     });
   } else if (!sessionReady) {
     setProgress({
-      message: 'AI の準備を確認しています…',
+      message: t('checkingAiReadiness'),
       percent: 0,
-      detail: '初回は約 22 GB のダウンロードが必要な場合があります',
+      detail: t('firstDownloadHint'),
       phase: 'preparing',
     });
   } else {
     setProgress({
-      message: 'AI が考え中…',
+      message: t('aiThinking'),
       percent: null,
       phase: 'streaming',
-      detail: '応答を待っています',
+      detail: t('waitingForResponse'),
       streamPreview: '',
     });
   }
@@ -741,7 +765,7 @@ async function analyzeTabs() {
     const tabs = await getOrganizableTabs(els.currentWindowOnly?.checked ?? true);
     const tabSummaries = tabs.map((tab) => ({
       id: tab.id,
-      title: tab.title || 'Untitled',
+      title: tab.title || t('untitledTab'),
       url: tab.url || '',
     }));
 
@@ -769,14 +793,7 @@ async function analyzeTabs() {
     renderPreview(currentPlan, tabSummaries);
     await refreshAiStatus();
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    if (message.includes('グループ化できるタブが見つかりませんでした')) {
-      showError(
-        `${message}。「グループ化の方針」を書くか、「ドメインで整理」を試してください。`,
-      );
-    } else {
-      showError(message);
-    }
+    showError(getDisplayError(error));
   } finally {
     clearProgress();
     setBusy(false);
@@ -797,18 +814,17 @@ async function applyGroups() {
     await applyGroupPlan(tabs, currentPlan);
     window.close();
   } catch (error) {
-    showError(error instanceof Error ? error.message : String(error));
+    showError(getDisplayError(error));
     setBusy(false);
     await refreshAiStatus();
   }
 }
 
 function handleFatalError(error) {
-  const message = error instanceof Error ? error.message : String(error);
   if (els.aiStatus) {
-    els.aiStatus.textContent = '拡張機能の初期化に失敗しました';
+    els.aiStatus.textContent = t('initFailed');
   }
-  showError(message);
+  showError(getDisplayError(error));
 }
 
 function validateRequiredElements() {
@@ -820,7 +836,7 @@ function validateRequiredElements() {
 
   for (const key of required) {
     if (!els[key]) {
-      throw new Error(`UI 要素が見つかりません: ${key}`);
+      throw new AppError(ErrorCode.UI_ELEMENT_NOT_FOUND, { key });
     }
   }
 }
@@ -851,13 +867,13 @@ function startSessionPrewarm() {
           els.aiStatus.textContent = progress.message;
         }
         setStatusDot('pending');
-        setProviderDetail('ローカル AI（Gemini Nano）');
+        setProviderDetail(t('localAiDetail'));
       } else if (progress.phase === 'loading' || progress.percent === 0) {
         if (els.aiStatus) {
-          els.aiStatus.textContent = 'AI モデルを読み込み中…';
+          els.aiStatus.textContent = t('loadingAiModel');
         }
         setStatusDot('pending');
-        setProviderDetail('ローカル AI（Gemini Nano）');
+        setProviderDetail(t('localAiDetail'));
       }
     },
   })
@@ -871,6 +887,7 @@ function startSessionPrewarm() {
 }
 
 function init() {
+  applyStaticI18n();
   registerGlobalErrorHandlers();
   validateRequiredElements();
 

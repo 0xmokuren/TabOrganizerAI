@@ -1,4 +1,5 @@
 import { applyGroupPlan, getOrganizableTabs } from '../lib/tab-manager.js';
+import { t } from '../lib/i18n.js';
 
 // AI 処理はユーザー操作が必要なため popup 側で実行する。
 // Service Worker は将来のバックグラウンド機能用に最小構成で残す。
@@ -23,7 +24,7 @@ async function handleMessage(message) {
         ok: true,
         tabs: tabs.map((tab) => ({
           id: tab.id,
-          title: tab.title || 'Untitled',
+          title: tab.title || t('untitledTab'),
           url: tab.url || '',
         })),
       };

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,67 +14,61 @@
       </div>
     </header>
 
-    <section class="provider-bar" aria-label="AI プロバイダ">
-      <div class="provider-switch" role="radiogroup" aria-label="分析方式">
+    <section class="provider-bar" data-i18n-aria-label="ariaAiProvider">
+      <div class="provider-switch" role="radiogroup" data-i18n-aria-label="ariaAnalysisMethod">
         <label class="provider-option">
           <input type="radio" name="ai-provider" id="provider-on-device" value="on-device" checked />
-          <span class="provider-option-label">オンデバイス</span>
+          <span class="provider-option-label" data-i18n="providerOnDevice"></span>
         </label>
         <label class="provider-option">
           <input type="radio" name="ai-provider" id="provider-gemini-api" value="gemini-api" />
-          <span class="provider-option-label">Gemini API</span>
+          <span class="provider-option-label" data-i18n="providerGeminiApi"></span>
         </label>
       </div>
       <div class="status-row">
         <span id="status-dot" class="status-dot" aria-hidden="true"></span>
-        <p id="ai-status" class="status-text">状態を確認中…</p>
+        <p id="ai-status" class="status-text" data-i18n="statusChecking"></p>
       </div>
       <p id="provider-detail" class="provider-detail hidden"></p>
     </section>
 
     <details id="gemini-settings-section" class="panel gemini-settings hidden">
-      <summary>API 設定</summary>
+      <summary data-i18n="apiSettingsSummary"></summary>
       <div class="panel-body">
-        <p class="panel-help">
-          タブのタイトルと URL が Google サーバーへ送信されます。API キーはこのブラウザにのみ保存されます。
-        </p>
-        <label class="field-label" for="gemini-api-key-input">API キー</label>
+        <p class="panel-help" data-i18n="apiSettingsHelp"></p>
+        <label class="field-label" for="gemini-api-key-input" data-i18n="apiKeyLabel"></label>
         <input
           id="gemini-api-key-input"
           type="password"
           autocomplete="off"
           spellcheck="false"
-          placeholder="Google AI Studio の API キー"
+          data-i18n-placeholder="apiKeyPlaceholder"
         />
         <p class="panel-link">
-          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
-            Google AI Studio で API キーを取得
-          </a>
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" data-i18n="getApiKeyLink"></a>
         </p>
-        <label class="field-label" for="gemini-model-select">モデル</label>
+        <label class="field-label" for="gemini-model-select" data-i18n="modelLabel"></label>
         <select id="gemini-model-select"></select>
         <p id="ai-provider-status" class="inline-status" aria-live="polite"></p>
       </div>
     </details>
 
     <details id="diagnostics" class="panel diagnostics">
-      <summary>診断情報</summary>
+      <summary data-i18n="diagnosticsSummary"></summary>
       <div class="panel-body">
         <ul id="diagnostics-list"></ul>
       </div>
     </details>
 
     <details id="user-prompt-section" class="panel user-prompt">
-      <summary>グループ化の方針（任意）</summary>
+      <summary data-i18n="userPromptSummary"></summary>
       <div class="panel-body">
-        <p class="panel-help">
-          仕事用タブとプライベートを分ける、買い物関連をまとめる、などの希望を書けます。内容はこのブラウザにのみ保存されます。
-        </p>
+        <p class="panel-help" data-i18n="userPromptHelp"></p>
         <textarea
           id="user-prompt-input"
           rows="3"
           maxlength="500"
-          placeholder="例: 仕事関連は青系、ニュースは1グループ、ショッピングはドメインごと"
+          data-i18n-placeholder="userPromptPlaceholder"
         ></textarea>
         <p id="user-prompt-status" class="inline-status" aria-live="polite"></p>
       </div>
@@ -83,15 +77,15 @@
     <section class="controls">
       <label class="toggle-pill">
         <input type="checkbox" id="current-window-only" checked />
-        <span>現在のウィンドウのみ</span>
+        <span data-i18n="currentWindowOnly"></span>
       </label>
-      <button id="analyze-btn" type="button" class="primary">AI で分析</button>
-      <button id="rule-based-btn" type="button" class="secondary">ドメインで整理</button>
+      <button id="analyze-btn" type="button" class="primary" data-i18n="analyzeWithAi"></button>
+      <button id="rule-based-btn" type="button" class="secondary" data-i18n="organizeByDomain"></button>
     </section>
 
     <section id="progress-section" class="hidden">
       <p id="progress-percent" class="progress-percent hidden"></p>
-      <p id="progress-text">AI を準備しています…</p>
+      <p id="progress-text" data-i18n="preparingAi"></p>
       <p id="progress-detail" class="progress-detail hidden"></p>
       <pre id="progress-stream" class="progress-stream hidden" aria-live="polite"></pre>
       <div class="progress-bar">
@@ -104,11 +98,11 @@
     </section>
 
     <section id="preview-section" class="hidden">
-      <h2>提案プレビュー</h2>
+      <h2 data-i18n="previewHeading"></h2>
       <div id="preview-list"></div>
       <div class="actions">
-        <button id="apply-btn" type="button" class="primary">グループを適用</button>
-        <button id="cancel-btn" type="button" class="secondary">キャンセル</button>
+        <button id="apply-btn" type="button" class="primary" data-i18n="applyGroups"></button>
+        <button id="cancel-btn" type="button" class="secondary" data-i18n="cancel"></button>
       </div>
     </section>
 
