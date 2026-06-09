@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Tab Organizer</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>AI Tab Organizer</h1>
+      <p id="ai-status" class="status">状態を確認中…</p>
+    </header>
+
+    <section class="controls">
+      <label class="checkbox">
+        <input type="checkbox" id="current-window-only" checked />
+        現在のウィンドウのみ
+      </label>
+      <button id="analyze-btn" type="button">タブを分析</button>
+    </section>
+
+    <section id="progress-section" class="hidden">
+      <p id="progress-text">AI を準備しています…</p>
+      <div class="progress-bar">
+        <div id="progress-fill"></div>
+      </div>
+    </section>
+
+    <section id="summary-section" class="hidden">
+      <p id="summary-text"></p>
+    </section>
+
+    <section id="preview-section" class="hidden">
+      <h2>提案プレビュー</h2>
+      <div id="preview-list"></div>
+      <div class="actions">
+        <button id="apply-btn" type="button" class="primary">グループを適用</button>
+        <button id="cancel-btn" type="button">キャンセル</button>
+      </div>
+    </section>
+
+    <p id="error-text" class="error hidden"></p>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
