@@ -38,29 +38,47 @@ let currentPlan = null;
 let statusPollTimer = null;
 
 function showError(message) {
+  if (!els.errorText) {
+    return;
+  }
   els.errorText.textContent = message;
   els.errorText.classList.remove('hidden');
 }
 
 function clearError() {
+  if (!els.errorText) {
+    return;
+  }
   els.errorText.textContent = '';
   els.errorText.classList.add('hidden');
 }
 
 function setBusy(busy) {
-  els.analyzeBtn.disabled = busy;
-  els.applyBtn.disabled = busy;
-  els.currentWindowOnly.disabled = busy;
+  if (els.analyzeBtn) {
+    els.analyzeBtn.disabled = busy;
+  }
+  if (els.applyBtn) {
+    els.applyBtn.disabled = busy;
+  }
+  if (els.currentWindowOnly) {
+    els.currentWindowOnly.disabled = busy;
+  }
 }
 
 function resetPreview() {
   currentPlan = null;
-  els.previewSection.classList.add('hidden');
-  els.summarySection.classList.add('hidden');
-  els.previewList.innerHTML = '';
+  els.previewSection?.classList.add('hidden');
+  els.summarySection?.classList.add('hidden');
+  if (els.previewList) {
+    els.previewList.innerHTML = '';
+  }
 }
 
 function renderPreview(plan, tabs) {
+  if (!els.previewList) {
+    return;
+  }
+
   els.previewList.innerHTML = '';
 
   for (const group of plan.groups) {
@@ -96,12 +114,18 @@ function renderPreview(plan, tabs) {
     els.previewList.appendChild(card);
   }
 
-  els.summaryText.textContent = `${plan.groups.length} グループ / ${tabs.length} タブを分析しました`;
-  els.summarySection.classList.remove('hidden');
-  els.previewSection.classList.remove('hidden');
+  if (els.summaryText) {
+    els.summaryText.textContent = `${plan.groups.length} グループ / ${tabs.length} タブを分析しました`;
+  }
+  els.summarySection?.classList.remove('hidden');
+  els.previewSection?.classList.remove('hidden');
 }
 
 function setProgress(text, percent = null) {
+  if (!els.progressSection || !els.progressText || !els.progressFill) {
+    return;
+  }
+
   els.progressSection.classList.remove('hidden');
   els.progressText.textContent = text;
   if (percent === null) {
@@ -114,12 +138,18 @@ function setProgress(text, percent = null) {
 }
 
 function clearProgress() {
-  els.progressSection.classList.add('hidden');
-  els.progressFill.classList.remove('indeterminate');
-  els.progressFill.style.width = '0%';
+  els.progressSection?.classList.add('hidden');
+  if (els.progressFill) {
+    els.progressFill.classList.remove('indeterminate');
+    els.progressFill.style.width = '0%';
+  }
 }
 
 function renderDiagnostics(result) {
+  if (!els.diagnostics || !els.diagnosticsList) {
+    return;
+  }
+
   els.diagnosticsList.innerHTML = '';
 
   if (result.probeSummary) {
@@ -152,20 +182,31 @@ function renderDiagnostics(result) {
 }
 
 async function refreshAiStatus() {
-  const result = await checkAiAvailability();
-  els.aiStatus.textContent = result.message;
-  els.analyzeBtn.disabled =
-    result.status === 'unavailable' || result.status === 'missing-api';
+  try {
+    const result = await checkAiAvailability();
 
-  renderDiagnostics(result);
+    if (els.aiStatus) {
+      els.aiStatus.textContent = result.message;
+    }
+    if (els.analyzeBtn) {
+      els.analyzeBtn.disabled =
+        result.status === 'unavailable' || result.status === 'missing-api';
+    }
 
-  if (statusPollTimer) {
-    clearTimeout(statusPollTimer);
-    statusPollTimer = null;
-  }
+    renderDiagnostics(result);
 
-  if (result.status === 'downloading') {
-    statusPollTimer = window.setTimeout(refreshAiStatus, 3000);
+    if (statusPollTimer) {
+      clearTimeout(statusPollTimer);
+      statusPollTimer = null;
+    }
+
+    if (result.status === 'downloading') {
+      statusPollTimer = window.setTimeout(() => {
+        refreshAiStatus().catch(handleFatalError);
+      }, 3000);
+    }
+  } catch (error) {
+    handleFatalError(error);
   }
 }
 
@@ -176,7 +217,7 @@ async function analyzeTabs() {
   setProgress('AI の準備を確認しています…', 0);
 
   try {
-    const tabs = await getOrganizableTabs(els.currentWindowOnly.checked);
+    const tabs = await getOrganizableTabs(els.currentWindowOnly?.checked ?? true);
     const tabSummaries = tabs.map((tab) => ({
       id: tab.id,
       title: tab.title || 'Untitled',
@@ -220,7 +261,7 @@ async function applyGroups() {
   setBusy(true);
 
   try {
-    const tabs = await getOrganizableTabs(els.currentWindowOnly.checked);
+    const tabs = await getOrganizableTabs(els.currentWindowOnly?.checked ?? true);
     await applyGroupPlan(tabs, currentPlan);
     window.close();
   } catch (error) {
@@ -229,8 +270,47 @@ async function applyGroups() {
   }
 }
 
-els.analyzeBtn.addEventListener('click', analyzeTabs);
-els.applyBtn.addEventListener('click', applyGroups);
-els.cancelBtn.addEventListener('click', resetPreview);
+function handleFatalError(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  if (els.aiStatus) {
+    els.aiStatus.textContent = '拡張機能の初期化に失敗しました';
+  }
+  showError(message);
+}
 
-refreshAiStatus();
+function validateRequiredElements() {
+  const required = [
+    'aiStatus',
+    'analyzeBtn',
+    'errorText',
+  ];
+
+  for (const key of required) {
+    if (!els[key]) {
+      throw new Error(`UI 要素が見つかりません: ${key}`);
+    }
+  }
+}
+
+function registerGlobalErrorHandlers() {
+  window.addEventListener('error', (event) => {
+    handleFatalError(event.error ?? new Error(event.message));
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    handleFatalError(event.reason);
+  });
+}
+
+function init() {
+  registerGlobalErrorHandlers();
+  validateRequiredElements();
+
+  els.analyzeBtn.addEventListener('click', analyzeTabs);
+  els.applyBtn?.addEventListener('click', applyGroups);
+  els.cancelBtn?.addEventListener('click', resetPreview);
+
+  refreshAiStatus().catch(handleFatalError);
+}
+
+init();
