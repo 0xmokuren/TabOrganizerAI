@@ -7,38 +7,86 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <header>
-      <h1>AI Tab Organizer</h1>
-      <p id="ai-status" class="status">状態を確認中…</p>
-      <p class="version">v1.2.0</p>
+    <header class="app-header">
+      <div class="header-top">
+        <h1>AI Tab Organizer</h1>
+        <span class="version-badge">v1.5.0</span>
+      </div>
     </header>
 
-    <details id="diagnostics" class="diagnostics">
-      <summary>診断情報</summary>
-      <ul id="diagnostics-list"></ul>
+    <section class="provider-bar" aria-label="AI プロバイダ">
+      <div class="provider-switch" role="radiogroup" aria-label="分析方式">
+        <label class="provider-option">
+          <input type="radio" name="ai-provider" id="provider-on-device" value="on-device" checked />
+          <span class="provider-option-label">オンデバイス</span>
+        </label>
+        <label class="provider-option">
+          <input type="radio" name="ai-provider" id="provider-gemini-api" value="gemini-api" />
+          <span class="provider-option-label">Gemini API</span>
+        </label>
+      </div>
+      <div class="status-row">
+        <span id="status-dot" class="status-dot" aria-hidden="true"></span>
+        <p id="ai-status" class="status-text">状態を確認中…</p>
+      </div>
+      <p id="provider-detail" class="provider-detail hidden"></p>
+    </section>
+
+    <details id="gemini-settings-section" class="panel gemini-settings hidden">
+      <summary>API 設定</summary>
+      <div class="panel-body">
+        <p class="panel-help">
+          タブのタイトルと URL が Google サーバーへ送信されます。API キーはこのブラウザにのみ保存されます。
+        </p>
+        <label class="field-label" for="gemini-api-key-input">API キー</label>
+        <input
+          id="gemini-api-key-input"
+          type="password"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Google AI Studio の API キー"
+        />
+        <p class="panel-link">
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
+            Google AI Studio で API キーを取得
+          </a>
+        </p>
+        <label class="field-label" for="gemini-model-select">モデル</label>
+        <select id="gemini-model-select"></select>
+        <p id="ai-provider-status" class="inline-status" aria-live="polite"></p>
+      </div>
     </details>
 
-    <details id="user-prompt-section" class="user-prompt">
+    <details id="diagnostics" class="panel diagnostics">
+      <summary>診断情報</summary>
+      <div class="panel-body">
+        <ul id="diagnostics-list"></ul>
+      </div>
+    </details>
+
+    <details id="user-prompt-section" class="panel user-prompt">
       <summary>グループ化の方針（任意）</summary>
-      <p class="user-prompt-help">
-        仕事用タブとプライベートを分ける、買い物関連をまとめる、などの希望を書けます。内容はこのブラウザにのみ保存されます。
-      </p>
-      <textarea
-        id="user-prompt-input"
-        rows="3"
-        maxlength="500"
-        placeholder="例: 仕事関連は青系、ニュースは1グループ、ショッピングはドメインごと"
-      ></textarea>
-      <p id="user-prompt-status" class="user-prompt-status" aria-live="polite"></p>
+      <div class="panel-body">
+        <p class="panel-help">
+          仕事用タブとプライベートを分ける、買い物関連をまとめる、などの希望を書けます。内容はこのブラウザにのみ保存されます。
+        </p>
+        <textarea
+          id="user-prompt-input"
+          rows="3"
+          maxlength="500"
+          placeholder="例: 仕事関連は青系、ニュースは1グループ、ショッピングはドメインごと"
+        ></textarea>
+        <p id="user-prompt-status" class="inline-status" aria-live="polite"></p>
+      </div>
     </details>
 
     <section class="controls">
-      <label class="checkbox">
+      <label class="toggle-pill">
         <input type="checkbox" id="current-window-only" checked />
-        現在のウィンドウのみ
+        <span>現在のウィンドウのみ</span>
       </label>
-      <button id="analyze-btn" type="button">AI で分析</button>
-      <button id="rule-based-btn" type="button">ドメインで整理</button>
+      <button id="analyze-btn" type="button" class="primary">AI で分析</button>
+      <button id="rule-based-btn" type="button" class="secondary">ドメインで整理</button>
     </section>
 
     <section id="progress-section" class="hidden">
@@ -52,7 +100,7 @@
     </section>
 
     <section id="summary-section" class="hidden">
-      <p id="summary-text"></p>
+      <p id="summary-text" class="summary-text"></p>
     </section>
 
     <section id="preview-section" class="hidden">
@@ -60,7 +108,7 @@
       <div id="preview-list"></div>
       <div class="actions">
         <button id="apply-btn" type="button" class="primary">グループを適用</button>
-        <button id="cancel-btn" type="button">キャンセル</button>
+        <button id="cancel-btn" type="button" class="secondary">キャンセル</button>
       </div>
     </section>
 

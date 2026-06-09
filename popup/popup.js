@@ -1,20 +1,31 @@
 import {
-  suggestGroups,
-  checkAiAvailability,
   warmSession,
   releaseSession,
   isSessionReady,
   UNAVAILABLE_HINTS,
 } from '../lib/ai-organizer.js';
+import {
+  suggestGroupsForProvider,
+  checkProviderAvailability,
+} from '../lib/ai-router.js';
 import { suggestGroupsByDomain } from '../lib/rule-based-grouper.js';
 import {
   applyGroupPlan,
   getOrganizableTabs,
+  resolvePlanWithExistingGroups,
 } from '../lib/tab-manager.js';
 import {
   loadUserInstructions,
   saveUserInstructions,
 } from '../lib/user-prompt.js';
+import {
+  AI_PROVIDERS,
+  loadAiProviderSettings,
+  saveAiProvider,
+  saveGeminiApiKey,
+  saveGeminiApiModel,
+} from '../lib/ai-provider-settings.js';
+import { GEMINI_API_MODELS } from '../lib/gemini-models.js';
 
 const COLOR_MAP = {
   grey: '#9aa0a6',
@@ -30,6 +41,8 @@ const COLOR_MAP = {
 
 const els = {
   aiStatus: document.getElementById('ai-status'),
+  statusDot: document.getElementById('status-dot'),
+  providerDetail: document.getElementById('provider-detail'),
   currentWindowOnly: document.getElementById('current-window-only'),
   analyzeBtn: document.getElementById('analyze-btn'),
   ruleBasedBtn: document.getElementById('rule-based-btn'),
@@ -50,12 +63,20 @@ const els = {
   diagnosticsList: document.getElementById('diagnostics-list'),
   userPromptInput: document.getElementById('user-prompt-input'),
   userPromptStatus: document.getElementById('user-prompt-status'),
+  providerOnDevice: document.getElementById('provider-on-device'),
+  providerGeminiApi: document.getElementById('provider-gemini-api'),
+  geminiSettingsSection: document.getElementById('gemini-settings-section'),
+  geminiApiKeyInput: document.getElementById('gemini-api-key-input'),
+  geminiModelSelect: document.getElementById('gemini-model-select'),
+  aiProviderStatus: document.getElementById('ai-provider-status'),
 };
 
 let currentPlan = null;
 let statusPollTimer = null;
 let sessionWarmPromise = null;
 let userPromptSaveTimer = null;
+let apiKeySaveTimer = null;
+let currentSettings = null;
 
 function showError(message) {
   if (!els.errorText) {
@@ -79,8 +100,117 @@ function setUserPromptStatus(message) {
   }
 }
 
+function setAiProviderStatus(message) {
+  if (els.aiProviderStatus) {
+    els.aiProviderStatus.textContent = message;
+  }
+}
+
 function getUserInstructionsFromInput() {
   return els.userPromptInput?.value ?? '';
+}
+
+function getSelectedProvider() {
+  if (els.providerGeminiApi?.checked) {
+    return AI_PROVIDERS.GEMINI_API;
+  }
+  return AI_PROVIDERS.ON_DEVICE;
+}
+
+function isGeminiApiProvider() {
+  return getSelectedProvider() === AI_PROVIDERS.GEMINI_API;
+}
+
+function updateGeminiApiFieldsVisibility() {
+  const showGemini = isGeminiApiProvider();
+  els.geminiSettingsSection?.classList.toggle('hidden', !showGemini);
+}
+
+function setStatusDot(state) {
+  if (!els.statusDot) {
+    return;
+  }
+
+  els.statusDot.classList.remove('ready', 'pending', 'error');
+  if (state) {
+    els.statusDot.classList.add(state);
+  }
+}
+
+function setProviderDetail(text) {
+  if (!els.providerDetail) {
+    return;
+  }
+
+  if (text) {
+    els.providerDetail.textContent = text;
+    els.providerDetail.classList.remove('hidden');
+  } else {
+    els.providerDetail.textContent = '';
+    els.providerDetail.classList.add('hidden');
+  }
+}
+
+function resolveStatusPresentation(result, settings) {
+  if (result.provider === AI_PROVIDERS.GEMINI_API) {
+    if (result.status === 'missing-key') {
+      return {
+        message: 'API キーを設定してください',
+        detail: result.modelLabel ? `モデル: ${result.modelLabel}` : null,
+        dot: 'error',
+      };
+    }
+
+    return {
+      message: '利用可能',
+      detail: result.modelLabel ? `モデル: ${result.modelLabel}` : null,
+      dot: 'ready',
+    };
+  }
+
+  if (result.status === 'unavailable' || result.status === 'missing-api' || result.status === 'error') {
+    return {
+      message: result.message,
+      detail: 'ローカル AI（Gemini Nano）',
+      dot: 'error',
+    };
+  }
+
+  if (
+    settings.aiProvider === AI_PROVIDERS.ON_DEVICE
+    && sessionWarmPromise
+    && !result.sessionReady
+  ) {
+    return {
+      message: 'AI を準備中…',
+      detail: 'ローカル AI（Gemini Nano）',
+      dot: 'pending',
+    };
+  }
+
+  if (result.status === 'downloading') {
+    return {
+      message: result.message,
+      detail: 'ローカル AI（Gemini Nano）',
+      dot: 'pending',
+    };
+  }
+
+  return {
+    message: result.message,
+    detail: 'ローカル AI（Gemini Nano）',
+    dot: result.sessionReady || result.status === 'available' || result.status === 'ready'
+      ? 'ready'
+      : 'pending',
+  };
+}
+
+function getSettingsFromInputs() {
+  return {
+    aiProvider: getSelectedProvider(),
+    geminiApiKey: els.geminiApiKeyInput?.value ?? '',
+    geminiApiModel: els.geminiModelSelect?.value ?? currentSettings?.geminiApiModel,
+  };
 }
 
 async function persistUserInstructions(showSavedMessage = true) {
@@ -110,6 +240,86 @@ function scheduleUserInstructionsSave() {
   }, 400);
 }
 
+async function persistGeminiApiKey(showSavedMessage = true) {
+  if (!els.geminiApiKeyInput) {
+    return '';
+  }
+
+  const saved = await saveGeminiApiKey(els.geminiApiKeyInput.value);
+  els.geminiApiKeyInput.value = saved;
+  currentSettings = {
+    ...currentSettings,
+    geminiApiKey: saved,
+  };
+
+  if (showSavedMessage) {
+    setAiProviderStatus(saved ? 'API キーを保存しました' : 'API キーをクリアしました');
+  }
+
+  await refreshAiStatus();
+  return saved;
+}
+
+function scheduleGeminiApiKeySave() {
+  if (apiKeySaveTimer) {
+    clearTimeout(apiKeySaveTimer);
+  }
+
+  setAiProviderStatus('保存中…');
+  apiKeySaveTimer = window.setTimeout(() => {
+    persistGeminiApiKey(true).catch(handleFatalError);
+    apiKeySaveTimer = null;
+  }, 400);
+}
+
+async function persistAiProvider() {
+  const provider = getSelectedProvider();
+  const saved = await saveAiProvider(provider);
+  currentSettings = {
+    ...currentSettings,
+    aiProvider: saved,
+  };
+  updateGeminiApiFieldsVisibility();
+  await refreshAiStatus();
+
+  if (saved === AI_PROVIDERS.ON_DEVICE) {
+    startSessionPrewarm();
+  }
+}
+
+async function persistGeminiApiModel() {
+  if (!els.geminiModelSelect) {
+    return currentSettings?.geminiApiModel;
+  }
+
+  const saved = await saveGeminiApiModel(els.geminiModelSelect.value);
+  els.geminiModelSelect.value = saved;
+  currentSettings = {
+    ...currentSettings,
+    geminiApiModel: saved,
+  };
+  setAiProviderStatus('モデルを保存しました');
+  await refreshAiStatus();
+  return saved;
+}
+
+function populateGeminiModelSelect(selectedModel) {
+  if (!els.geminiModelSelect) {
+    return;
+  }
+
+  els.geminiModelSelect.innerHTML = '';
+
+  for (const model of GEMINI_API_MODELS) {
+    const option = document.createElement('option');
+    option.value = model.id;
+    option.textContent = model.label;
+    els.geminiModelSelect.appendChild(option);
+  }
+
+  els.geminiModelSelect.value = selectedModel;
+}
+
 async function initUserPromptSettings() {
   if (!els.userPromptInput) {
     return;
@@ -129,6 +339,43 @@ async function initUserPromptSettings() {
   });
 }
 
+async function initAiProviderSettings() {
+  currentSettings = await loadAiProviderSettings();
+
+  if (currentSettings.aiProvider === AI_PROVIDERS.GEMINI_API) {
+    els.providerGeminiApi.checked = true;
+  } else {
+    els.providerOnDevice.checked = true;
+  }
+
+  populateGeminiModelSelect(currentSettings.geminiApiModel);
+
+  if (els.geminiApiKeyInput) {
+    els.geminiApiKeyInput.value = currentSettings.geminiApiKey;
+  }
+
+  updateGeminiApiFieldsVisibility();
+  setAiProviderStatus('');
+
+  els.providerOnDevice?.addEventListener('change', () => {
+    persistAiProvider().catch(handleFatalError);
+  });
+  els.providerGeminiApi?.addEventListener('change', () => {
+    persistAiProvider().catch(handleFatalError);
+  });
+  els.geminiApiKeyInput?.addEventListener('input', scheduleGeminiApiKeySave);
+  els.geminiApiKeyInput?.addEventListener('blur', () => {
+    if (apiKeySaveTimer) {
+      clearTimeout(apiKeySaveTimer);
+      apiKeySaveTimer = null;
+    }
+    persistGeminiApiKey(true).catch(handleFatalError);
+  });
+  els.geminiModelSelect?.addEventListener('change', () => {
+    persistGeminiApiModel().catch(handleFatalError);
+  });
+}
+
 function setBusy(busy) {
   if (els.analyzeBtn) {
     els.analyzeBtn.disabled = busy;
@@ -145,6 +392,18 @@ function setBusy(busy) {
   if (els.userPromptInput) {
     els.userPromptInput.disabled = busy;
   }
+  if (els.providerOnDevice) {
+    els.providerOnDevice.disabled = busy;
+  }
+  if (els.providerGeminiApi) {
+    els.providerGeminiApi.disabled = busy;
+  }
+  if (els.geminiApiKeyInput) {
+    els.geminiApiKeyInput.disabled = busy;
+  }
+  if (els.geminiModelSelect) {
+    els.geminiModelSelect.disabled = busy;
+  }
 }
 
 function resetPreview() {
@@ -154,6 +413,21 @@ function resetPreview() {
   if (els.previewList) {
     els.previewList.innerHTML = '';
   }
+}
+
+function formatPlanSummary(plan, tabCount) {
+  const base = `${plan.groups.length} グループ / ${tabCount} タブ`;
+  const summary = plan.mergeSummary;
+
+  if (!summary?.merge) {
+    return `${base} を分析しました`;
+  }
+
+  if (summary.create === 0) {
+    return `${base}（すべて既存グループに統合）`;
+  }
+
+  return `${base}（既存に ${summary.merge}・新規 ${summary.create}）`;
 }
 
 function renderPreview(plan, tabs) {
@@ -172,13 +446,21 @@ function renderPreview(plan, tabs) {
 
     const dot = document.createElement('span');
     dot.className = 'color-dot';
-    dot.style.background = COLOR_MAP[group.color] || COLOR_MAP.blue;
+    const displayColor = group.mergeTarget?.color ?? group.color;
+    dot.style.background = COLOR_MAP[displayColor] || COLOR_MAP.blue;
 
     const title = document.createElement('span');
     title.textContent = `${group.name} (${group.tabIndices.length} タブ)`;
 
+    const badge = document.createElement('span');
+    badge.className = `group-action ${group.mergeTarget ? 'merge' : 'create'}`;
+    badge.textContent = group.mergeTarget
+      ? `→ 既存「${group.mergeTarget.title}」`
+      : '新規';
+
     header.appendChild(dot);
     header.appendChild(title);
+    header.appendChild(badge);
 
     const list = document.createElement('ul');
     for (const index of group.tabIndices) {
@@ -197,7 +479,7 @@ function renderPreview(plan, tabs) {
   }
 
   if (els.summaryText) {
-    els.summaryText.textContent = `${plan.groups.length} グループ / ${tabs.length} タブを分析しました`;
+    els.summaryText.textContent = formatPlanSummary(plan, tabs.length);
   }
   els.summarySection?.classList.remove('hidden');
   els.previewSection?.classList.remove('hidden');
@@ -284,6 +566,14 @@ function renderDiagnostics(result) {
 
   els.diagnosticsList.innerHTML = '';
 
+  if (result.provider === AI_PROVIDERS.GEMINI_API) {
+    appendDiagnosticItem('プロバイダ: Gemini API');
+    if (result.modelLabel) {
+      appendDiagnosticItem(`モデル: ${result.modelLabel}`);
+    }
+    return;
+  }
+
   if (result.environmentSummary) {
     appendDiagnosticItem(result.environmentSummary);
   }
@@ -326,25 +616,41 @@ function renderDiagnostics(result) {
     }
   }
 
-  els.diagnostics.open = els.diagnosticsList.children.length > 0;
+  const shouldOpenDiagnostics = result.status === 'unavailable'
+    || result.status === 'missing-api'
+    || result.status === 'missing-key'
+    || result.status === 'error';
+
+  if (els.diagnostics) {
+    els.diagnostics.open = shouldOpenDiagnostics;
+  }
+}
+
+function shouldDisableAnalyze(result) {
+  if (result.provider === AI_PROVIDERS.GEMINI_API) {
+    return result.status === 'missing-key';
+  }
+
+  return result.status === 'unavailable' || result.status === 'missing-api';
 }
 
 async function refreshAiStatus() {
   try {
-    const result = await checkAiAvailability();
+    const settings = getSettingsFromInputs();
+    const result = await checkProviderAvailability(settings.aiProvider, settings);
+
+    const presentation = resolveStatusPresentation(result, settings);
 
     if (els.aiStatus) {
-      if (sessionWarmPromise && !result.sessionReady) {
-        els.aiStatus.textContent = 'AI を準備中…';
-      } else {
-        els.aiStatus.textContent = result.message;
-      }
+      els.aiStatus.textContent = presentation.message;
     }
+    setStatusDot(presentation.dot);
+    setProviderDetail(presentation.detail);
+
     if (els.analyzeBtn) {
-      els.analyzeBtn.disabled =
-        result.status === 'unavailable' ||
-        result.status === 'missing-api';
+      els.analyzeBtn.disabled = shouldDisableAnalyze(result);
     }
+
     if (els.ruleBasedBtn) {
       els.ruleBasedBtn.disabled = false;
     }
@@ -356,7 +662,10 @@ async function refreshAiStatus() {
       statusPollTimer = null;
     }
 
-    if (result.status === 'downloading') {
+    if (
+      settings.aiProvider === AI_PROVIDERS.ON_DEVICE
+      && result.status === 'downloading'
+    ) {
       statusPollTimer = window.setTimeout(() => {
         refreshAiStatus().catch(handleFatalError);
       }, 3000);
@@ -379,18 +688,19 @@ async function analyzeTabsByDomain() {
       url: tab.url || '',
     }));
 
-    const plan = suggestGroupsByDomain(tabs);
+    const currentWindowOnly = els.currentWindowOnly?.checked ?? true;
+    const plan = await resolvePlanWithExistingGroups(
+      suggestGroupsByDomain(tabs),
+      tabs,
+      currentWindowOnly,
+    );
     currentPlan = plan;
     renderPreview(plan, tabSummaries);
-
-    if (els.summaryText) {
-      els.summaryText.textContent =
-        `${plan.groups.length} グループ / ${tabs.length} タブ（ドメイン単位）`;
-    }
   } catch (error) {
     showError(error instanceof Error ? error.message : String(error));
   } finally {
     setBusy(false);
+    await refreshAiStatus();
   }
 }
 
@@ -399,8 +709,18 @@ async function analyzeTabs() {
   resetPreview();
   setBusy(true);
 
-  const sessionReady = isSessionReady();
-  if (!sessionReady) {
+  const settings = getSettingsFromInputs();
+  const useGeminiApi = settings.aiProvider === AI_PROVIDERS.GEMINI_API;
+  const sessionReady = !useGeminiApi && isSessionReady();
+
+  if (useGeminiApi) {
+    setProgress({
+      message: 'Gemini API で分析中…',
+      percent: null,
+      phase: 'analyzing',
+      detail: null,
+    });
+  } else if (!sessionReady) {
     setProgress({
       message: 'AI の準備を確認しています…',
       percent: 0,
@@ -426,27 +746,41 @@ async function analyzeTabs() {
     }));
 
     const userInstructions = await persistUserInstructions(false);
+    const currentWindowOnly = els.currentWindowOnly?.checked ?? true;
 
-    const plan = await suggestGroups(tabs, {
+    const rawPlan = await suggestGroupsForProvider(settings.aiProvider, tabs, {
+      settings,
       userInstructions,
       onProgress(progress) {
         const showDuringAnalyze = progress.phase === 'analyzing'
           || progress.phase === 'streaming';
-        if (sessionReady && !showDuringAnalyze) {
+        if (!useGeminiApi && sessionReady && !showDuringAnalyze) {
           return;
         }
         setProgress(progress);
       },
     });
 
-    currentPlan = plan;
-    renderPreview(plan, tabSummaries);
+    currentPlan = await resolvePlanWithExistingGroups(
+      rawPlan,
+      tabs,
+      currentWindowOnly,
+    );
+    renderPreview(currentPlan, tabSummaries);
     await refreshAiStatus();
   } catch (error) {
-    showError(error instanceof Error ? error.message : String(error));
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('グループ化できるタブが見つかりませんでした')) {
+      showError(
+        `${message}。「グループ化の方針」を書くか、「ドメインで整理」を試してください。`,
+      );
+    } else {
+      showError(message);
+    }
   } finally {
     clearProgress();
     setBusy(false);
+    await refreshAiStatus();
   }
 }
 
@@ -465,6 +799,7 @@ async function applyGroups() {
   } catch (error) {
     showError(error instanceof Error ? error.message : String(error));
     setBusy(false);
+    await refreshAiStatus();
   }
 }
 
@@ -501,6 +836,10 @@ function registerGlobalErrorHandlers() {
 }
 
 function startSessionPrewarm() {
+  if (isGeminiApiProvider()) {
+    return;
+  }
+
   sessionWarmPromise = warmSession({
     onProgress(progress) {
       if (!els.aiStatus || isSessionReady()) {
@@ -508,9 +847,17 @@ function startSessionPrewarm() {
       }
 
       if (progress.phase === 'downloading' || progress.phase === 'background') {
-        els.aiStatus.textContent = progress.message;
+        if (els.aiStatus) {
+          els.aiStatus.textContent = progress.message;
+        }
+        setStatusDot('pending');
+        setProviderDetail('ローカル AI（Gemini Nano）');
       } else if (progress.phase === 'loading' || progress.percent === 0) {
-        els.aiStatus.textContent = 'AI モデルを読み込み中…';
+        if (els.aiStatus) {
+          els.aiStatus.textContent = 'AI モデルを読み込み中…';
+        }
+        setStatusDot('pending');
+        setProviderDetail('ローカル AI（Gemini Nano）');
       }
     },
   })
@@ -536,9 +883,10 @@ function init() {
     releaseSession();
   });
 
-  refreshAiStatus()
+  initAiProviderSettings()
     .then(async () => {
       await initUserPromptSettings();
+      await refreshAiStatus();
       startSessionPrewarm();
     })
     .catch(handleFatalError);

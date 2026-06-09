@@ -31,8 +31,8 @@ async function handleMessage(message) {
 
     case 'APPLY_GROUPS': {
       const tabs = await getOrganizableTabs(message.currentWindowOnly !== false);
-      const created = await applyGroupPlan(tabs, message.plan);
-      return { ok: true, created };
+      const result = await applyGroupPlan(tabs, message.plan);
+      return { ok: true, ...result };
     }
 
     default:
