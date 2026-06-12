@@ -272,6 +272,6 @@ Kein Analytics-SDK. Quellcode offen.
 
 <div align="center">
 
-<sub>Tab Cluster AI v1.5.2 · <a href="https://github.com/0xmokuren/TabClusterAI/issues">Issue melden</a> · <a href="README.md">English</a></sub>
+<sub>Tab Cluster AI v1.5.3 · <a href="https://github.com/0xmokuren/TabClusterAI/issues">Issue melden</a> · <a href="README.md">English</a></sub>
 
 </div>

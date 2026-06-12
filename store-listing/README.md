@@ -24,7 +24,7 @@ Tab Cluster AI を Chrome Web Store に申請するときに [Developer Dashboar
 | 1 | このブランチをマージし、`PRIVACY.md` を main に置く | あなた |
 | 2 | リポジトリ Settings → Pages → Source: `main` / root を有効化 | あなた |
 | 3 | `screenshot-guide.md` に従って 1〜5 枚撮影 | あなた |
-| 4 | [Developer Dashboard](https://chrome.google.com/webstore/devconsole) → 新しいアイテム → `tab-cluster-ai-1.5.2.zip` をアップロード | あなた |
+| 4 | [Developer Dashboard](https://chrome.google.com/webstore/devconsole) → 新しいアイテム → `dist/TabClusterAI-1.5.3.zip` をアップロード | あなた |
 | 5 | Store listing タブ: メイン言語を English にして `description.en.txt` を貼り付け、アイコン (`icons/icon128.png`) とスクリーンショットをアップロード | あなた |
 | 6 | 言語を追加 (Japanese / German / Spanish / French) し、各 description.*.txt を貼り付け | あなた |
 | 7 | Privacy practices タブ: `permission-justifications.md` と `data-usage-declaration.md` の内容を入力。Privacy policy URL に `https://0xmokuren.github.io/TabClusterAI/PRIVACY.html` を入れる | あなた |
