@@ -11,8 +11,10 @@ import {
 import { suggestGroupsByDomain } from '../lib/rule-based-grouper.js';
 import {
   applyGroupPlan,
+  countTabGroupsInScope,
   getOrganizableTabs,
   resolvePlanWithExistingGroups,
+  ungroupAllTabs,
 } from '../lib/tab-manager.js';
 import {
   loadUserInstructions,
@@ -52,6 +54,8 @@ const els = {
   currentWindowOnly: document.getElementById('current-window-only'),
   analyzeBtn: document.getElementById('analyze-btn'),
   ruleBasedBtn: document.getElementById('rule-based-btn'),
+  ungroupAllBtn: document.getElementById('ungroup-all-btn'),
+  actionStatus: document.getElementById('action-status'),
   progressSection: document.getElementById('progress-section'),
   progressPercent: document.getElementById('progress-percent'),
   progressText: document.getElementById('progress-text'),
@@ -409,6 +413,64 @@ function setBusy(busy) {
   }
   if (els.geminiModelSelect) {
     els.geminiModelSelect.disabled = busy;
+  }
+  if (els.ungroupAllBtn) {
+    els.ungroupAllBtn.disabled = busy;
+  }
+}
+
+let actionStatusTimer = null;
+
+function showActionStatus(message, type = 'info') {
+  if (!els.actionStatus) {
+    return;
+  }
+  els.actionStatus.textContent = message;
+  els.actionStatus.classList.remove('hidden', 'success');
+  if (type === 'success') {
+    els.actionStatus.classList.add('success');
+  }
+  if (actionStatusTimer) {
+    clearTimeout(actionStatusTimer);
+  }
+  actionStatusTimer = window.setTimeout(() => {
+    els.actionStatus?.classList.add('hidden');
+    actionStatusTimer = null;
+  }, 3500);
+}
+
+async function ungroupAllInScope() {
+  clearError();
+  const currentWindowOnly = els.currentWindowOnly?.checked ?? true;
+
+  let count;
+  try {
+    count = await countTabGroupsInScope(currentWindowOnly);
+  } catch (error) {
+    showError(getDisplayError(error));
+    return;
+  }
+
+  if (count === 0) {
+    showActionStatus(t('ungroupNoGroups'));
+    return;
+  }
+
+  if (!window.confirm(t('ungroupConfirm', String(count)))) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    const { ungroupedTabs, removedGroups } = await ungroupAllTabs(currentWindowOnly);
+    showActionStatus(
+      t('ungroupComplete', String(removedGroups), String(ungroupedTabs)),
+      'success',
+    );
+  } catch (error) {
+    showError(getDisplayError(error));
+  } finally {
+    setBusy(false);
   }
 }
 
@@ -895,6 +957,7 @@ function init() {
   els.ruleBasedBtn?.addEventListener('click', analyzeTabsByDomain);
   els.applyBtn?.addEventListener('click', applyGroups);
   els.cancelBtn?.addEventListener('click', resetPreview);
+  els.ungroupAllBtn?.addEventListener('click', ungroupAllInScope);
 
   window.addEventListener('pagehide', () => {
     releaseSession();

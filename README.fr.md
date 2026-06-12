@@ -255,6 +255,6 @@ Pas de SDK analytique. Code source ouvert.
 
 <div align="center">
 
-<sub>Tab Cluster AI v1.5.3 · <a href="https://github.com/0xmokuren/TabClusterAI/issues">Signaler un problème</a> · <a href="README.md">English</a></sub>
+<sub>Tab Cluster AI v1.5.4 · <a href="https://github.com/0xmokuren/TabClusterAI/issues">Signaler un problème</a> · <a href="README.md">English</a></sub>
 
 </div>

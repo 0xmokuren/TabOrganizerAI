@@ -128,5 +128,9 @@
   "langJa": { "message": "Japanisch" },
   "languageCandidateLabel": { "message": "$LABEL$-Ausgabe (Browser: $CODE$)", "placeholders": { "label": { "content": "$1" }, "code": { "content": "$2" } } },
   "errorEmptyAiResponse": { "message": "KI lieferte leere Antwort" },
-  "errorInvalidJson": { "message": "KI-Antwort konnte nicht als JSON geparst werden" }
+  "errorInvalidJson": { "message": "KI-Antwort konnte nicht als JSON geparst werden" },
+  "ungroupAll": { "message": "Alle Gruppen auflösen" },
+  "ungroupConfirm": { "message": "$COUNT$ Tab-Gruppen in diesem Fenster auflösen?", "placeholders": { "count": { "content": "$1", "example": "5" } } },
+  "ungroupNoGroups": { "message": "Keine Tab-Gruppen zum Auflösen" },
+  "ungroupComplete": { "message": "$GROUPS$ Gruppen aufgelöst ($TABS$ Tabs)", "placeholders": { "groups": { "content": "$1", "example": "5" }, "tabs": { "content": "$2", "example": "17" } } }
 }

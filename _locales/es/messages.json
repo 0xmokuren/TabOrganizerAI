@@ -128,5 +128,9 @@
   "langJa": { "message": "Japonés" },
   "languageCandidateLabel": { "message": "Salida en $LABEL$ (navegador: $CODE$)", "placeholders": { "label": { "content": "$1" }, "code": { "content": "$2" } } },
   "errorEmptyAiResponse": { "message": "La IA devolvió una respuesta vacía" },
-  "errorInvalidJson": { "message": "No se pudo analizar la respuesta de IA como JSON" }
+  "errorInvalidJson": { "message": "No se pudo analizar la respuesta de IA como JSON" },
+  "ungroupAll": { "message": "Desagrupar todo" },
+  "ungroupConfirm": { "message": "¿Desagrupar los $COUNT$ grupos de pestañas en esta ventana?", "placeholders": { "count": { "content": "$1", "example": "5" } } },
+  "ungroupNoGroups": { "message": "No hay grupos de pestañas para desagrupar" },
+  "ungroupComplete": { "message": "$GROUPS$ grupos desagrupados ($TABS$ pestañas)", "placeholders": { "groups": { "content": "$1", "example": "5" }, "tabs": { "content": "$2", "example": "17" } } }
 }

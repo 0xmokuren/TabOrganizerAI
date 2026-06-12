@@ -368,6 +368,6 @@ No analytics SDK. No remote config. Open source — inspect [`lib/`](lib/) and [
 
 <div align="center">
 
-<sub>Tab Cluster AI v1.5.3 · <a href="https://github.com/0xmokuren/TabClusterAI/issues">Report an issue</a> · <a href="README.ja.md">日本語</a></sub>
+<sub>Tab Cluster AI v1.5.4 · <a href="https://github.com/0xmokuren/TabClusterAI/issues">Report an issue</a> · <a href="README.ja.md">日本語</a></sub>
 
 </div>

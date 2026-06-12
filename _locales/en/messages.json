@@ -648,5 +648,33 @@
   },
   "errorInvalidJson": {
     "message": "Could not parse AI response as JSON"
+  },
+  "ungroupAll": {
+    "message": "Ungroup all"
+  },
+  "ungroupConfirm": {
+    "message": "Ungroup all $COUNT$ tab groups in this window?",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "ungroupNoGroups": {
+    "message": "No tab groups to ungroup"
+  },
+  "ungroupComplete": {
+    "message": "Ungrouped $GROUPS$ groups ($TABS$ tabs)",
+    "placeholders": {
+      "groups": {
+        "content": "$1",
+        "example": "5"
+      },
+      "tabs": {
+        "content": "$2",
+        "example": "17"
+      }
+    }
   }
 }

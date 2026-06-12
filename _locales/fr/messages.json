@@ -128,5 +128,9 @@
   "langJa": { "message": "Japonais" },
   "languageCandidateLabel": { "message": "Sortie $LABEL$ (navigateur : $CODE$)", "placeholders": { "label": { "content": "$1" }, "code": { "content": "$2" } } },
   "errorEmptyAiResponse": { "message": "L'IA a renvoyé une réponse vide" },
-  "errorInvalidJson": { "message": "Impossible d'analyser la réponse IA en JSON" }
+  "errorInvalidJson": { "message": "Impossible d'analyser la réponse IA en JSON" },
+  "ungroupAll": { "message": "Tout dégrouper" },
+  "ungroupConfirm": { "message": "Dégrouper les $COUNT$ groupes d'onglets de cette fenêtre ?", "placeholders": { "count": { "content": "$1", "example": "5" } } },
+  "ungroupNoGroups": { "message": "Aucun groupe d'onglets à dégrouper" },
+  "ungroupComplete": { "message": "$GROUPS$ groupes dégroupés ($TABS$ onglets)", "placeholders": { "groups": { "content": "$1", "example": "5" }, "tabs": { "content": "$2", "example": "17" } } }
 }

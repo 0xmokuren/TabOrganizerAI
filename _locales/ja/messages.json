@@ -128,5 +128,9 @@
   "langJa": { "message": "日本語" },
   "languageCandidateLabel": { "message": "$LABEL$出力（ブラウザ: $CODE$）", "placeholders": { "label": { "content": "$1" }, "code": { "content": "$2" } } },
   "errorEmptyAiResponse": { "message": "AI から空の応答が返されました" },
-  "errorInvalidJson": { "message": "AI の応答を JSON として解析できませんでした" }
+  "errorInvalidJson": { "message": "AI の応答を JSON として解析できませんでした" },
+  "ungroupAll": { "message": "グループを全解除" },
+  "ungroupConfirm": { "message": "このウィンドウの $COUNT$ 個のタブグループを解除します。よろしいですか？", "placeholders": { "count": { "content": "$1", "example": "5" } } },
+  "ungroupNoGroups": { "message": "解除できるタブグループがありません" },
+  "ungroupComplete": { "message": "$GROUPS$ 個のグループを解除しました（$TABS$ 個のタブ）", "placeholders": { "groups": { "content": "$1", "example": "5" }, "tabs": { "content": "$2", "example": "17" } } }
 }
