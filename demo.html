@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Tab Cluster AI — Demo tabs</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { color-scheme: light dark; --fg: #1f2328; --muted: #57606a; --line: #d0d7de; --bg: #ffffff; --card: #f6f8fa; --accent: #1a73e8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg: #e6edf3; --muted: #8b949e; --line: #30363d; --bg: #0d1117; --card: #161b22; }
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif; max-width: 880px; margin: 32px auto; padding: 0 20px; line-height: 1.6; color: var(--fg); background: var(--bg); }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  button { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: var(--fg); cursor: pointer; font: inherit; font-size: 13px; }
+  button:hover { filter: brightness(1.05); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .group { margin: 12px 0; padding: 14px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); }
+  .group-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .group h2 { font-size: 15px; margin: 0; flex: 1; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .count { color: var(--muted); font-size: 12px; }
+  ul { margin: 4px 0 10px 0; padding-left: 22px; }
+  li { margin: 2px 0; font-size: 14px; }
+  a { color: var(--accent); text-decoration: none; word-break: break-all; }
+  a:hover { text-decoration: underline; }
+  .group-actions button { font-size: 12px; padding: 4px 10px; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 24px; padding: 12px 14px; background: var(--card); border-radius: 6px; border: 1px solid var(--line); }
+  .note code { background: rgba(127,127,127,0.18); padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+  footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<h1>Tab Cluster AI — Demo tabs</h1>
+<p class="sub">Chrome Web Store 用スクリーンショットを撮るためのデモタブ集。1 クリックで全部または各カテゴリを開けます。<br>個人情報の映り込みを避けるため、Chrome の<strong>新規プロファイル</strong>で開くことを推奨します。</p>
+
+<div class="toolbar">
+  <button class="primary" id="open-all">▶ すべて開く（17 タブ）</button>
+  <button id="copy-urls">URL をコピー</button>
+  <button id="open-store">Web Store の申請画面を開く</button>
+</div>
+
+<div class="group" data-color="blue">
+  <div class="group-head">
+    <span class="dot" style="background:#4285f4"></span>
+    <h2>仕事 / 開発</h2>
+    <span class="count">4 タブ</span>
+  </div>
+  <ul>
+    <li><a href="https://github.com/explore" target="_blank" rel="noopener noreferrer">github.com/explore</a></li>
+    <li><a href="https://github.com/trending" target="_blank" rel="noopener noreferrer">github.com/trending</a></li>
+    <li><a href="https://docs.github.com/" target="_blank" rel="noopener noreferrer">docs.github.com</a></li>
+    <li><a href="https://linear.app/homepage" target="_blank" rel="noopener noreferrer">linear.app/homepage</a></li>
+  </ul>
+  <div class="group-actions"><button class="group-open">このグループだけ開く</button></div>
+</div>
+
+<div class="group" data-color="green">
+  <div class="group-head">
+    <span class="dot" style="background:#34a853"></span>
+    <h2>学習 / 技術ドキュメント</h2>
+    <span class="count">5 タブ</span>
+  </div>
+  <ul>
+    <li><a href="https://developer.mozilla.org/ja/" target="_blank" rel="noopener noreferrer">developer.mozilla.org/ja</a></li>
+    <li><a href="https://developer.chrome.com/" target="_blank" rel="noopener noreferrer">developer.chrome.com</a></li>
+    <li><a href="https://stackoverflow.com/" target="_blank" rel="noopener noreferrer">stackoverflow.com</a></li>
+    <li><a href="https://web.dev/" target="_blank" rel="noopener noreferrer">web.dev</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Tab_(GUI)" target="_blank" rel="noopener noreferrer">en.wikipedia.org / Tab (GUI)</a></li>
+  </ul>
+  <div class="group-actions"><button class="group-open">このグループだけ開く</button></div>
+</div>
+
+<div class="group" data-color="orange">
+  <div class="group-head">
+    <span class="dot" style="background:#fbbc04"></span>
+    <h2>買い物</h2>
+    <span class="count">3 タブ</span>
+  </div>
+  <ul>
+    <li><a href="https://www.amazon.co.jp/" target="_blank" rel="noopener noreferrer">amazon.co.jp</a></li>
+    <li><a href="https://www.rakuten.co.jp/" target="_blank" rel="noopener noreferrer">rakuten.co.jp</a></li>
+    <li><a href="https://www.yodobashi.com/" target="_blank" rel="noopener noreferrer">yodobashi.com</a></li>
+  </ul>
+  <div class="group-actions"><button class="group-open">このグループだけ開く</button></div>
+</div>
+
+<div class="group" data-color="red">
+  <div class="group-head">
+    <span class="dot" style="background:#ea4335"></span>
+    <h2>ニュース</h2>
+    <span class="count">3 タブ</span>
+  </div>
+  <ul>
+    <li><a href="https://news.ycombinator.com/" target="_blank" rel="noopener noreferrer">news.ycombinator.com</a></li>
+    <li><a href="https://www.nhk.or.jp/news/" target="_blank" rel="noopener noreferrer">nhk.or.jp/news</a></li>
+    <li><a href="https://techcrunch.com/" target="_blank" rel="noopener noreferrer">techcrunch.com</a></li>
+  </ul>
+  <div class="group-actions"><button class="group-open">このグループだけ開く</button></div>
+</div>
+
+<div class="group" data-color="purple">
+  <div class="group-head">
+    <span class="dot" style="background:#a142f4"></span>
+    <h2>エンタメ</h2>
+    <span class="count">2 タブ</span>
+  </div>
+  <ul>
+    <li><a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">youtube.com</a></li>
+    <li><a href="https://www.reddit.com/" target="_blank" rel="noopener noreferrer">reddit.com</a></li>
+  </ul>
+  <div class="group-actions"><button class="group-open">このグループだけ開く</button></div>
+</div>
+
+<p class="note">
+  💡 <strong>初回の Tip:</strong> 「すべて開く」を押すと Chrome が <code>ポップアップとリダイレクト</code> をブロックすることがあります。
+  アドレスバー右端のアイコンから <strong>「常に許可」</strong> を選んでもう一度押してください。<br>
+  💡 撮影後にタブを一気に閉じるには <code>Cmd+Option+W</code>（macOS） / <code>Ctrl+Shift+W</code>（Windows）。
+</p>
+
+<footer>
+  <a href="https://github.com/0xmokuren/TabClusterAI" target="_blank" rel="noopener noreferrer">github.com/0xmokuren/TabClusterAI</a>
+  · <a href="PRIVACY.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+</footer>
+
+<script>
+  const allLinks = () => [...document.querySelectorAll('.group a')].map(a => a.href);
+  const open = url => window.open(url, '_blank', 'noopener,noreferrer');
+
+  document.querySelectorAll('.group').forEach(g => {
+    const urls = [...g.querySelectorAll('a')].map(a => a.href);
+    g.querySelector('.group-open').addEventListener('click', () => urls.forEach(open));
+  });
+
+  document.getElementById('open-all').addEventListener('click', () => allLinks().forEach(open));
+
+  document.getElementById('copy-urls').addEventListener('click', async () => {
+    const text = allLinks().join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      const btn = document.getElementById('copy-urls');
+      const original = btn.textContent;
+      btn.textContent = '✓ コピー済み';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    } catch {
+      alert(text);
+    }
+  });
+
+  document.getElementById('open-store').addEventListener('click', () => {
+    open('https://chrome.google.com/webstore/devconsole');
+  });
+</script>
+</body>
+</html>
