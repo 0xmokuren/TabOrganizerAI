@@ -1,0 +1,75 @@
+Tab Cluster AI automatically groups your open Chrome tabs using either on-device AI (Gemini Nano) or the Gemini API. Built as an open-source alternative to the discontinued Tab Organizer, it always shows you a preview before touching your tabs.
+
+═══════════════════════════════
+✦ TWO WAYS TO ANALYZE
+═══════════════════════════════
+
+• On-device AI (Gemini Nano)
+  Runs entirely inside Chrome via the Prompt API. No API key. No data ever leaves your browser. Requires Chrome 138+ and a one-time ~22 GB model download.
+
+• Gemini API
+  Bring your own free key from Google AI Studio. Works on any modern Chrome, including machines that can't run the on-device model. Choose from Gemini 3.1 Flash-Lite, 3.5 Flash, 2.5 Flash/Pro and more.
+
+• Organize by domain (no AI)
+  Pure rule-based grouping by hostname — no model, no API key, no network. Great as a fallback.
+
+═══════════════════════════════
+✦ WHY YOU'LL LIKE IT
+═══════════════════════════════
+
+✓ Preview before apply — see every suggested group name, color, and member before anything changes. Cancel anytime.
+
+✓ Merges into existing groups — if you already have a "Work" or "Shopping" group, new tabs are folded in rather than duplicating it.
+
+✓ Your own grouping rules — leave a free-text note like "separate work and personal" or "shopping by domain" and the AI follows it. Stored locally only.
+
+✓ Built-in diagnostics — when on-device AI is unavailable, the popup tells you exactly why (Chrome version, RAM, flags, model status) and what to try.
+
+✓ Multilingual UI — English, 日本語, Deutsch, Español, Français. UI follows your Chrome language; group names follow your browser content language. The two are independent on purpose.
+
+✓ Manifest V3, no analytics, no telemetry, no remote code. Source is on GitHub.
+
+═══════════════════════════════
+✦ PRIVACY
+═══════════════════════════════
+
+• On-device mode: tab titles and URLs are processed by Chrome locally. Nothing is sent anywhere.
+
+• Gemini API mode: tab titles and URLs are sent to Google's Generative Language API using YOUR API key. The extension author never sees them.
+
+• Organize by domain: nothing is sent anywhere.
+
+• Your API key, model choice, and grouping preferences are stored only in chrome.storage.local on this device. Uninstalling removes them.
+
+Full policy: https://0xmokuren.github.io/TabClusterAI/PRIVACY.html
+
+═══════════════════════════════
+✦ REQUIREMENTS
+═══════════════════════════════
+
+On-device mode
+• Chrome 138 or later
+• 16 GB+ RAM or a discrete GPU with 4 GB+ VRAM
+• 22 GB+ free disk for the first model download
+• Unmetered network for the first download
+
+Gemini API mode
+• Any Manifest V3 Chrome
+• A free Gemini API key from Google AI Studio (https://aistudio.google.com/apikey)
+• Network access to generativelanguage.googleapis.com
+
+═══════════════════════════════
+✦ LIMITS
+═══════════════════════════════
+
+• Up to 40 tabs per analysis (model payload limit)
+• Minimum 2 ungrouped tabs to form a group (Chrome requirement)
+• Pinned and chrome:// tabs are excluded
+• Group names capped at 20 characters
+
+═══════════════════════════════
+✦ OPEN SOURCE
+═══════════════════════════════
+
+MIT-licensed. Issues, ideas, and pull requests welcome:
+https://github.com/0xmokuren/TabClusterAI

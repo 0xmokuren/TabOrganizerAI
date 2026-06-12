@@ -1,0 +1,74 @@
+Tab Cluster AI agrupa automáticamente las pestañas abiertas de Chrome usando IA en el dispositivo (Gemini Nano) o la API de Gemini. Es una alternativa de código abierto al desaparecido Tab Organizer. Siempre muestra una vista previa antes de tocar tus pestañas.
+
+═══════════════════════════════
+✦ TRES MODOS DE ANÁLISIS
+═══════════════════════════════
+
+• IA en el dispositivo (Gemini Nano)
+  Se ejecuta totalmente dentro de Chrome mediante la Prompt API. Sin clave API. Sin envíos. Requiere Chrome 138+ y una descarga inicial del modelo (~22 GB).
+
+• API de Gemini
+  Usa tu propia clave gratuita de Google AI Studio. Funciona en equipos donde el modelo local no es viable. Varios modelos disponibles (Gemini 3.1 Flash-Lite, 3.5 Flash, 2.5 Pro…).
+
+• Organizar por dominio (sin IA)
+  Agrupación por nombre de host basada en reglas: sin modelo, sin clave, sin red.
+
+═══════════════════════════════
+✦ POR QUÉ TE GUSTARÁ
+═══════════════════════════════
+
+✓ Vista previa antes de aplicar — revisa nombres, colores y miembros de cada grupo. Cancela cuando quieras.
+
+✓ Fusión con grupos existentes — si ya tienes "Trabajo" o "Compras", las nuevas pestañas se integran en lugar de duplicarse.
+
+✓ Tus propias reglas — escribe un texto libre como "separar trabajo y personal" y la IA lo respeta. Se guarda solo localmente.
+
+✓ Diagnóstico integrado — cuando la IA local no está disponible, el popup indica versión de Chrome, RAM, flags y estado del modelo, con sugerencias concretas.
+
+✓ Interfaz multilingüe — Español, English, 日本語, Deutsch, Français. La UI sigue el idioma de Chrome; los nombres de grupo siguen el idioma de contenido del navegador (independientes a propósito).
+
+✓ Manifest V3. Sin analítica, sin telemetría, sin código remoto. Código en GitHub.
+
+═══════════════════════════════
+✦ PRIVACIDAD
+═══════════════════════════════
+
+• Modo local: títulos y URLs se procesan dentro de Chrome. Sin envío externo.
+
+• Modo Gemini API: títulos y URLs se envían con TU clave a la Generative Language API de Google. El autor nunca los ve.
+
+• Organizar por dominio: sin envío.
+
+• Tu clave y preferencias se guardan únicamente en chrome.storage.local de este perfil. Al desinstalar se eliminan.
+
+Política completa: https://0xmokuren.github.io/TabClusterAI/PRIVACY.html
+
+═══════════════════════════════
+✦ REQUISITOS
+═══════════════════════════════
+
+Modo local
+• Chrome 138 o superior
+• 16 GB+ de RAM o GPU con 4 GB+ de VRAM
+• 22 GB+ de disco libre para la descarga inicial del modelo
+• Red no medida durante la primera descarga
+
+Modo Gemini API
+• Cualquier Chrome con Manifest V3
+• Clave API gratuita de Google AI Studio (https://aistudio.google.com/apikey)
+
+═══════════════════════════════
+✦ LÍMITES
+═══════════════════════════════
+
+• Hasta 40 pestañas por análisis
+• Mínimo 2 pestañas sin agrupar para formar un grupo
+• Pestañas fijadas y chrome:// quedan excluidas
+• Nombres de grupo de hasta 20 caracteres
+
+═══════════════════════════════
+✦ CÓDIGO ABIERTO
+═══════════════════════════════
+
+Licencia MIT. Issues y pull requests bienvenidos:
+https://github.com/0xmokuren/TabClusterAI
