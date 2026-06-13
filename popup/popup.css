@@ -365,6 +365,29 @@ button.ghost:hover:not(:disabled) {
   color: var(--success, #34a853);
 }
 
+.app-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border, rgba(127, 127, 127, 0.18));
+  text-align: center;
+}
+
+.support-link {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.support-link::before {
+  content: "♡  ";
+  color: #ea4335;
+}
+
+.support-link:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
 button:disabled {
   opacity: 0.55;
   cursor: not-allowed;

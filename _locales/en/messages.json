@@ -676,5 +676,8 @@
         "example": "17"
       }
     }
+  },
+  "supportDevelopment": {
+    "message": "Support development on GitHub Sponsors"
   }
 }

@@ -9,6 +9,7 @@
   <img src="https://img.shields.io/badge/Manifest-V3-4285F4" alt="Manifest V3">
   <img src="https://img.shields.io/badge/i18n-5_Sprachen-blue" alt="5 languages">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/0xmokuren/TabClusterAI" alt="License"></a>
+  <a href="https://github.com/sponsors/0xmokuren"><img src="https://img.shields.io/badge/Sponsor-%E2%99%A1-ea4aaa?logo=githubsponsors&logoColor=white" alt="Sponsor"></a>
 </p>
 
 | English | 日本語 | Deutsch | Español | Français |
@@ -272,6 +273,6 @@ Kein Analytics-SDK. Quellcode offen.
 
 <div align="center">
 
-<sub>Tab Cluster AI v1.5.4 · <a href="https://github.com/0xmokuren/TabClusterAI/issues">Issue melden</a> · <a href="README.md">English</a></sub>
+<sub>Tab Cluster AI v1.5.5 · <a href="https://github.com/0xmokuren/TabClusterAI/issues">Issue melden</a> · <a href="README.md">English</a></sub>
 
 </div>
