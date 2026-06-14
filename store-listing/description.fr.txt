@@ -1,0 +1,81 @@
+Tab Cluster AI regroupe automatiquement les onglets Chrome ouverts grâce à une IA embarquée (Gemini Nano) ou à l'API Gemini. Alternative open-source au Tab Organizer abandonné par Google. Chaque suggestion s'affiche en aperçu avant toute modification de vos onglets.
+
+═══════════════════════════════
+✦ TROIS MODES D'ANALYSE
+═══════════════════════════════
+
+• IA embarquée (Gemini Nano)
+  S'exécute entièrement dans Chrome via la Prompt API. Aucune clé API. Aucune donnée transmise. Nécessite Chrome 138+ et un téléchargement initial du modèle (~22 Go).
+
+• API Gemini
+  Vous utilisez votre propre clé gratuite obtenue depuis Google AI Studio. Fonctionne sur les machines qui ne peuvent pas exécuter le modèle local. Plusieurs modèles disponibles (Gemini 3.1 Flash-Lite, 3.5 Flash, 2.5 Pro…).
+
+• Organiser par domaine (sans IA)
+  Regroupement par nom d'hôte basé sur des règles — sans modèle, sans clé, sans réseau.
+
+═══════════════════════════════
+✦ POINTS FORTS
+═══════════════════════════════
+
+✓ Aperçu avant application — vérifiez les noms, couleurs et membres de chaque groupe. Annulez à tout moment.
+
+✓ Fusion dans les groupes existants — si vous avez déjà « Travail » ou « Achats », les nouveaux onglets y sont intégrés au lieu de créer des doublons.
+
+✓ Vos propres règles — saisissez un texte libre comme « séparer le travail et le personnel » et l'IA s'y conforme. Conservé localement.
+
+✓ Diagnostic intégré — si l'IA embarquée n'est pas disponible, la popup affiche version de Chrome, RAM, flags et état du modèle avec des pistes concrètes.
+
+✓ Interface multilingue — Français, English, 日本語, Deutsch, Español. L'UI suit la langue de Chrome, les noms de groupes suivent la langue de contenu du navigateur (volontairement indépendants).
+
+✓ Manifest V3, aucun analytics, aucune télémétrie, aucun code distant. Source disponible sur GitHub.
+
+═══════════════════════════════
+✦ CONFIDENTIALITÉ
+═══════════════════════════════
+
+• Mode embarqué : titres et URLs traités localement par Chrome. Aucun envoi.
+
+• Mode Gemini API : titres et URLs envoyés avec VOTRE clé à la Generative Language API de Google. L'auteur ne les voit jamais.
+
+• Organiser par domaine : aucun envoi.
+
+• Clé API, modèle choisi et préférences ne sont stockés que dans chrome.storage.local de ce profil. La désinstallation les supprime.
+
+Politique complète : https://0xmokuren.github.io/TabClusterAI/PRIVACY.html
+
+═══════════════════════════════
+✦ PRÉREQUIS
+═══════════════════════════════
+
+Mode embarqué
+• Chrome 138 ou supérieur
+• 16 Go+ de RAM ou GPU avec 4 Go+ de VRAM
+• 22 Go+ d'espace disque pour le téléchargement initial
+• Réseau non facturé à la consommation pour le premier téléchargement
+
+Mode API Gemini
+• Chrome Manifest V3 récent
+• Clé API gratuite depuis Google AI Studio (https://aistudio.google.com/apikey)
+
+═══════════════════════════════
+✦ LIMITES
+═══════════════════════════════
+
+• 40 onglets maximum par analyse
+• Au moins 2 onglets non groupés requis pour former un groupe
+• Onglets épinglés et chrome:// exclus
+• Noms de groupes limités à 20 caractères
+
+═══════════════════════════════
+✦ OPEN SOURCE
+═══════════════════════════════
+
+Licence MIT. Issues et pull requests bienvenues :
+https://github.com/0xmokuren/TabClusterAI
+
+═══════════════════════════════
+✦ SOUTENIR LE DÉVELOPPEMENT
+═══════════════════════════════
+
+Tab Cluster AI est gratuit et open-source. S'il vous fait gagner du temps, soutenez le développement sur GitHub Sponsors :
+https://github.com/sponsors/0xmokuren
